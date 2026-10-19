@@ -1,0 +1,16 @@
+{
+  "name": "swarm-autopsy",
+  "owner": {
+    "name": "agryu-in"
+  },
+  "metadata": {
+    "description": "Swarm Autopsy: a live forensic pane for multi-agent Claude Code sessions, drawn over animated Spooky and Cozy scenes with lofi music."
+  },
+  "plugins": [
+    {
+      "name": "swarm-autopsy",
+      "source": "./swarm-autopsy",
+      "description": "See what every subagent was asked, did and cost, how their work connects, where they collided and what is unresolved, over a still, animated scene (Spooky or Cozy) with lofi music and liquid glass."
+    }
+  ]
+}

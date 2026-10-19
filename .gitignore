@@ -1,0 +1,5 @@
+# Written by Claude Code when the mod loads (its type contract for editors), not part of the mod.
+swarm-autopsy/.claude-plugin/types/
+node_modules/
+.DS_Store
+*.log
