@@ -242,6 +242,8 @@ Claude Code does not expose a subagent's window to mods, which is why a subagent
 
 **From delegation to verification: did each agent's work lead anywhere, and was it checked?**
 
+![The Trail view over Twilight Flower Shop: the outcome so far (5 subagents, 0 files changed), two verification commands whose latest runs were inconclusive, with the reason, spend by outcome, and the contribution flow with its lanes](docs/images/view-trail.jpg)
+
 *Use it to* find edits that were never checked after their last change, and see whose reports fed the next step.
 
 **The chain.** Each agent's work moves through five stages:
@@ -347,6 +349,10 @@ The full list is in [the reference](docs/TECHNICAL.md#tool-calls-tests-and-check
 
 **Where agents got in each other's way.**
 
+![The Collisions view in a session where no agent wrote a file: it says why the matrix is empty and that no collision signals were raised](docs/images/view-collisions.jpg)
+
+<p align="center"><i>In this session no agent wrote a file, so the matrix is empty and no signal was raised.</i></p>
+
 *Use it to* find the usual reasons a swarm's result doesn't hold together: two agents editing the same code, one
 undoing another, or a test run against a moving target.
 
@@ -391,6 +397,8 @@ Signals are decided by the session's own event order, with no clock windows.
 
 **Every event, in order, with the evidence behind it.**
 
+![The Forensics view: 96 events on page 1 of 3, chips to filter by kind (all, agents, files, tests, failures, signals) and by agent, and each event's number, time, agent, summary and result](docs/images/view-forensics.jpg)
+
 *Use it to* trace any claim in another view back to the exact events it rests on.
 
 **The selected event shows:**
@@ -418,6 +426,8 @@ Signals are decided by the session's own event order, with no clock windows.
 ### Spend
 
 **Where the tokens went, and what they bought.**
+
+![The Spend view: the session's tokens by category, the per-agent ledger with each agent's outcome, the largest token use, and spend vs outcome by bucket](docs/images/view-spend.jpg)
 
 *Use it to* see which agents spent the most, whether the cache did the work, and how much of the session went to
 checked work.
@@ -469,6 +479,8 @@ reads usually dominate it, so a share is a share of tokens processed, not of cos
 ### Health
 
 **One list of what to look at.**
+
+![The Health view: eight findings grouped by source (trail flags, context, spend vs outcome, coverage gaps), each with its label, its evidence, and buttons to show it in Trail or open its agent](docs/images/view-health.jpg)
 
 Health gathers what the other analyses already found, in six groups:
 1. trail flags;
