@@ -44,7 +44,7 @@ relative to `swarm-autopsy/`.
 ```mermaid
 flowchart LR
   E["Claude Code session events"] -->|"hooks observe, then pass every result through"| R["Session record<br/>hooks/lib/reduce.ts"]
-  R -->|"once per revision"| A["Analyses<br/>trail · collisions · ledger · context · outcome · health"]
+  R -->|"fixed rules, no model calls"| A["Analyses<br/>trail · collisions · ledger · context · outcome · health"]
   A --> V["Views<br/>Live · Trail · Collisions · Forensics · Spend · Health"]
   V -->|terminal| T["Engine tree, classic look"]
   V -->|"desktop app"| D["Two Clients: still scene behind, content in front"]
@@ -92,7 +92,8 @@ The record is one `Snapshot` (`types/index.d.ts`). It holds:
 - key `ui` holds the pane's state: the tab, filters, selection, the part of each tab and the ≈$ switch.
 
 Session state survives `/reload-plugins`. A stored record is reused only for the same session id. `/clear` or a resume
-starts a new one. The record is written at most once a second, and at once after a command or a session event.
+starts a new one. The record is written at most once a second on the tick, and at once when `/swarm-autopsy` runs, at
+session start, and after `/clear` or a resume.
 
 **Caps.** They keep the record small and the pane fast:
 
@@ -462,7 +463,8 @@ entries.
 
 **When it redraws:**
 - The pane redraws when the session record or its own state changes. The record is written at most once a second.
-- Analyses are computed once per revision of the record, and per ≈$ setting.
+- The trail, collisions, ledger, spend and Health are computed once per revision of the record and ≈$ setting.
+  Context gauges are worked out per drawing.
 - **Held while you browse.** A press holds the drawing's data and clock for 20 s, so the line you are about to press
   does not move and every press finds its handler. **⏸ pause** holds it until you press **▶ live**.
 
@@ -546,7 +548,8 @@ references.
 - **Deterministic.** Each scene is seeded by its id (mulberry32), so it draws the same every time.
 - **Motion** is SVG animation (`<animate>`, `<animateTransform>`), repeating forever, with negative start times so a
   scene loads mid-motion. Nothing is redrawn to animate.
-- **Shape.** The scene is rebuilt only when its inputs change: the pane's size in pixels (estimated at 8.5 px a column
+- **Shape.** On the still pane, the scene is rebuilt only when the scene or these inputs change (the engine-tree
+  fallback redraws it with the pane): the pane's size in pixels (estimated at 8.5 px a column
   and 20 px a row, capped at 4,096), the main session's context fill, and the count of active subagents. A wide window
   shows more of the sides; a tall dock adds sky above and ground below.
 - **Layers.** A surround (stars, mist or motes, and ground fog), the painting, and a veil over the header and card

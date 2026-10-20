@@ -1,5 +1,11 @@
 # Swarm Autopsy · Claude Mod
 
+[![version 1.0.0](https://img.shields.io/badge/version-1.0.0-6d5bd0)](https://github.com/agryu-in/swarm-autopsy-claude-mod/releases/tag/v1.0.0)
+![559 tests](https://img.shields.io/badge/tests-559-2ea44f)
+![0 dependencies](https://img.shields.io/badge/dependencies-0-0a7bbb)
+![0 model calls](https://img.shields.io/badge/model%20calls-0-0a7bbb)
+![0 network calls](https://img.shields.io/badge/network%20calls-0-0a7bbb)
+
 A live forensic pane for multi-agent Claude Code sessions. It shows:
 - what each subagent was asked to do;
 - what it observably did, and what its tokens were;
@@ -37,48 +43,50 @@ general-purpose, a coder, a test engineer and a code reviewer) fixing a bug in a
 
 <p align="center"><i>The same session over Rainy Forest Cabin, Hollow Library, Drowned Lighthouse and Mire Lights.</i></p>
 
-## Why it's useful
+## Why Swarm Autopsy
 
-When a session hands work to subagents, most of that work happens out of sight. The transcript shows each subagent's
-final report, but not:
-- its tool calls;
-- its tokens;
-- how its work met everyone else's.
+When a session hands work to subagents, the transcript shows what each one reported back. It does not lay out what
+each one did and cost, file by file and request by request, or how its work met everyone else's. Swarm Autopsy records
+the session's own events as they happen and turns them into answers you can check.
 
-Swarm Autopsy reads the session's own events as they happen and answers these questions, with evidence:
+| | Reading the transcript | With Swarm Autopsy |
+| --- | --- | --- |
+| A subagent's work | What it reported back | Every tool call it made (delegations as spawns), with its files, command and a result excerpt, each with the hook it came from |
+| Did the tests pass? | The agent's own account | The check's own exit status, read step by step |
+| Two agents on one file | Pieced together by hand | Seven collision signals, decided by event order |
+| Was a report used? | Not shown | A verbatim match or a shared path, labelled by how sure it is |
 
-- **Who did what?**
-  - which subagents ran, and who spawned each (the spawn's `tool_use_id` is the evidence);
-  - what each was asked;
-  - which files it read and wrote;
-  - whether it completed, failed or was stopped.
-- **Was the work checked?** For every changed file: did a test or check pass *after its last edit*, and which rule ties
-  that check to the file? Files changed with no check after their final edit are flagged as unverified.
-- **Did the test really pass?** A run counts as passed only when the tool reported success and nothing hid the exit
-  status. A step after the check (`| tail`, `|| true`, `; echo`), a background `&`, a refusal or an interruption makes
-  it *inconclusive*, never passed.
-- **Did agents get in each other's way?**
-  - two agents writing one file, in turn or interleaved;
-  - one agent replacing text another wrote;
-  - a write based on a read that another agent's edit had made stale;
-  - an edit landing while another agent's test was running;
-  - the same path changed in separate worktrees.
-- **Was a report used?** Did a subagent's report reach a later delegation word for word, or were the files it named
-  edited afterwards? Or does nothing captured show it being used?
-- **Where did the tokens go?**
-  - per agent and per spawn tree, by model;
-  - with input, cache read, cache write and output kept apart;
-  - and what share went to verified, unverified, failed, report-only or unresolved work.
-- **How full did the context get?**
-  - the main session's fill, as Claude Code reports it;
-  - each subagent's estimate, with its assumption;
-  - the peak prompt, and the compactions it heard.
-- **What couldn't it see?** Activity before it loaded, events past its cap, and requests that came back with no usage.
+**Highlights:**
+- **Deterministic.** Fixed rules over ids, paths and event order: no model calls, no network.
+- **Every claim labelled:** ● OBSERVED, ◆ LINKED, ◇ INFERRED, ? UNRESOLVED or ∅ UNAVAILABLE.
+  [The labels →](#reading-the-evidence-labels)
+- **`| tail` and `|| true` never count as a pass.** A test passes only when the check itself set the exit status.
+  [Test verdicts →](#test-verdicts)
+- **Seven collision signals,** across agents and worktrees. [Collisions →](#collisions)
+- **A per-request token ledger:** each agent's own requests (*direct*) and its whole spawn tree (*subtree*), in four
+  categories. [Spend →](#spend)
+- **Read-only and scriptable.** Results pass through unchanged, and the whole session exports as JSON.
+  [Export →](#export-and-scripting)
 
-**When it helps:**
-- **While a swarm runs,** to catch a collision or a failing check early.
-- **After it ends,** to review what each agent contributed before you trust the result.
-- **When tuning a workflow,** to see which agents spend the most, and for what outcome.
+**At a glance:**
+- **Runs in:** Claude Code 2.1.287 or later, in the terminal and the desktop app ([requirements](#install)).
+- **Records:** live, from the moment the session loads the mod. It can't replay a session that has already happened.
+- **Footprint:**
+  - TypeScript source, loaded through one entry module (`hooks/register.tsx`);
+  - twelve MP3 tracks, about 20 MB;
+  - no dependencies and no build step.
+- **Licence:** no open-source licence. It is free to install and use; ask before reusing the code
+  ([details](#credits-and-licence)).
+
+**Contents:**
+- **Get started:** [Install](#install) · [Use it](#use-it) · [Try it in a minute](#try-it-in-a-minute) ·
+  [The views](#the-views)
+- **The views in depth:** [Evidence labels](#reading-the-evidence-labels) · [Features in depth](#features-in-depth) ·
+  [What it does not do](#what-it-deliberately-does-not-do)
+- **The look:** [The desktop look](#the-desktop-look) · [All twelve scenes](#all-twelve-scenes)
+- **Use the data:** [Export and scripting](#export-and-scripting) · [Configuration](#configuration) · [FAQ](#faq)
+- **How it is built:** [Architecture](#architecture) · [Known limitations](#known-limitations) · [Develop](#develop) ·
+  [Technical reference](docs/TECHNICAL.md)
 
 ## Install
 
@@ -123,6 +131,24 @@ already open, run `/reload-plugins`.
 In the terminal, `1` to `6` switch views while the pane has the keyboard (`ctrl+x tab`, or a click). Tab walks the
 buttons, and Esc hands the keys back. On the desktop, click the tabs.
 
+## Try it in a minute
+
+1. Install it (above), then open Claude Code in a project that has tests.
+2. Run `/swarm-autopsy`. The mod records from the moment the session loads it, so the pane can be opened at any time.
+3. Give the session work that splits across subagents, for example:
+
+   ```text
+   Use three subagents in parallel: one to find where the date helpers are tested,
+   one to fix the failing date test, and one to review the fix and run the tests.
+   ```
+
+4. Watch **Live** while they run.
+5. Then open:
+   - **Trail:** did a check pass after each file's last edit?
+   - **Collisions:** did the agents touch the same files?
+   - **Health:** what is still open?
+6. Run `/swarm-autopsy export` to get the whole session as one JSON file.
+
 ## The views
 
 | View | Shows |
@@ -134,162 +160,317 @@ buttons, and Esc hands the keys back. On the desktop, click the tabs.
 | **Spend** | The token ledger: per agent, its own requests (direct) and its whole spawn tree (subtree), with the four token categories kept apart, and session totals. A ≈$ API-equivalent estimate is shown only after you turn it on. Below it, *spend vs outcome*: each agent's tokens grouped by what its work amounted to (verified, changed but unverified, failed or inconclusive, report only, unresolved, mixed), with the denominator stated. |
 | **Health** | The findings the other analyses already raised, grouped by source, each with its evidence label, its agents and its events. No score and no traffic light. |
 
-## How each view works
+## Reading the evidence labels
 
-Every view reads one session record and the analyses computed from it, once per change. The full rules, with every
-threshold, are in the [technical reference](docs/TECHNICAL.md).
+| Label | Glyph | Meaning |
+| --- | --- | --- |
+| OBSERVED | ● | Reported directly by an event, message, command result or tool result. |
+| LINKED | ◆ | Connected by explicit identifiers: a spawn's parent, `agentId` on the agent's own events, a verbatim excerpt of one agent's report in another's delegation prompt, a delegation prompt naming the exact path the agent then edited, or an edit replacing text another agent wrote. |
+| INFERRED | ◇ | Plausible from indirect evidence: a shared path or file stem plus event order. A candidate, not proof. |
+| UNRESOLVED | ? | Not enough evidence to decide: an *unlinked contribution*, an *unverified change*, a latest test run that failed. |
+| UNAVAILABLE | ∅ | The interface does not expose it: a subagent's context %, the task of an agent spawned before the mod loaded. |
+
+Numbers carry a simpler label:
+- **OBSERVED ●:** read from an event.
+- **ESTIMATED ≈:** computed from a stated assumption, such as a ≈$ figure, or a subagent's % on the same model as the
+  main session.
+- **UNAVAILABLE ∅:** not exposed or not yet captured.
+
+## Features in depth
+
+Each view below gives:
+1. what it is for;
+2. its main rule;
+3. the rest of its details, folded (click to open).
+
+| You want to know | View | Decided by |
+| --- | --- | --- |
+| Who spawned which agent, and what was it asked? | [Live](#live) | The spawn record |
+| Did anything check this file after its last edit? | [Trail](#trail) | A linked check after the file's last write |
+| Did that test really pass? | [Test verdicts](#test-verdicts) | The check's own exit status |
+| Did two agents edit one file, or overwrite each other? | [Collisions](#collisions) | The writers, in event order |
+| Was a subagent's report used? | [Trail](#trail) | Verbatim text or a shared path |
+| Which agent used the most tokens, on which model? | [Spend](#spend) | Each request's own usage |
+| What share of the tokens went to verified work? | [Spend](#spend) | One outcome bucket per agent |
+| How close is each agent to its context limit? | [Live](#live) | The main session's reading, or a labelled estimate |
+| What should I look at first? | [Health](#health) | Every finding above, with its evidence |
 
 ### Live
 
-**What it shows:**
-- **The coordinator** (the main session), then each subagent in order of first sight: full cards for the first 4 to 12
-  (by the pane's height), then one line each.
-- **Filters:** all, active, completed and failed.
-- **A card** is built from the record:
-  - the task: the spawn's description (or the agent list's), never invented;
-  - the state: from how its turn ended (an answer is completed, aborted is stopped, anything else failed), and from
-    Claude Code's agent list whenever the mod reads it;
-  - its tokens and context gauge, from the ledger.
-- **Pressing any line** of a card opens the inspector: under the card on a medium pane, in a detail column on a wide
-  one, in place of the list on a compact one.
-- **Recent activity** (the last 5 events) sits beside the cards on a wide pane. Every layout ends with a short Health
-  strip.
+**The swarm right now: who is working, on what, and how close each agent is to its limit.**
+
+*Use it to* spot a stuck or failing agent, one near its context limit, or one burning tokens.
 
 **The context gauge:**
-- **The main session.** Its % is Claude Code's own reading, OBSERVED.
-- **A subagent.** Claude Code does not expose a subagent's window to mods, so its % is ESTIMATED: its latest prompt
-  over the main session's window when both run the same model, otherwise over a dated table of documented windows.
-- **An unknown model** shows UNAVAILABLE.
 
-**Why it's useful:** you see at a glance who is working, on what, how close each agent is to its context limit, and
-how much it has used.
+| Agent | How it is measured | Label |
+| --- | --- | --- |
+| Main session | Claude Code's own `session.measure` reading | ● OBSERVED |
+| Subagent on the main session's model | Its latest prompt ÷ the main session's window | ≈ ESTIMATED |
+| Subagent on another model | Its latest prompt ÷ that model's window, from a [dated table](docs/TECHNICAL.md#context) | ≈ ESTIMATED |
+| No usage yet, a model with no known window, or a prompt larger than the window; for the main session, no reading yet | Not shown | ∅ UNAVAILABLE |
+
+Claude Code does not expose a subagent's window to mods, which is why a subagent's figure is always an estimate.
+
+<details>
+<summary><b>Cards, state, the inspector and the layout</b></summary>
+
+- **Order.** The coordinator first, then each subagent in order of first sight.
+- **Cards.**
+  - The first 4 to 12 subagents get full cards; the pane's height sets how many (rows ÷ 8). The rest get one line
+    each.
+  - The list stops at 40 agents, with "N more agents".
+  - The terminal's compact pane (below 56 columns) draws one line per agent.
+- **Filters:** all, active, completed, failed.
+- **State.**
+  - From how the agent's turn ended: an answer is completed, aborted is stopped, and any other end is failed.
+  - Or from `SubagentStop`, or from Claude Code's agent list.
+- **The task** is the spawn's description, quoted. It is never invented: missing, it reads *task description
+  unavailable*.
+- **The inspector.** Press any line of a card to open it: the delegated prompt, files, report, context history, token
+  ledger, outcome and events.
+  - Medium pane: under the card.
+  - Wide pane: in a detail column.
+  - Compact pane: instead of the list.
+  - From 140 columns: three columns (cards, details, and activity with Health).
+- **Stable while you read.** A press holds the drawing's data for 20 s, so lines don't move under the pointer.
+  **⏸ pause** holds it until you resume.
+
+</details>
 
 ### Trail
 
-**The chain.** Each agent's work is a chain of five stages:
-1. **delegation:** its prompt;
-2. **investigation:** its reads, searches and read-only commands;
-3. **finding:** its report;
-4. **change:** each file it wrote successfully;
-5. **verification:** its test and check runs.
+**From delegation to verification: did each agent's work lead anywhere, and was it checked?**
 
-**The edges.** Fixed rules join the chains:
+*Use it to* find edits that were never checked after their last change, and see whose reports fed the next step.
+
+**The chain.** Each agent's work moves through five stages:
+
+| Stage | Holds |
+| --- | --- |
+| 1. delegation | The agent's prompt |
+| 2. investigation | Its reads, searches and read-only commands |
+| 3. finding | Its report |
+| 4. change | Each file it wrote successfully |
+| 5. verification | Its test and check runs |
+
+**The edges.** Edges join the chains. Each is drawn by a fixed rule, and carries its label and that rule's basis:
 
 | Edge | Drawn when | Label |
 | --- | --- | --- |
-| parent → delegation | the spawn record names the parent | LINKED |
-| report → parent | the report came back to the agent's parent | LINKED |
-| report → a later delegation | 12 or more words of the report appear verbatim in the later prompt | LINKED (fewer words: INFERRED) |
-| report → a later delegation | the report and the later prompt name the same path | INFERRED |
-| report → another agent's later change | the report names the changed file, and that agent could have received the report | INFERRED |
-| delegation → the agent's own change | its prompt names the file it then edited | LINKED by path, INFERRED by file name |
-| change → verification | a passed or failed test or check after the change names the file, was run by the same agent, or names no file and ran in the file's working tree | INFERRED |
+| parent → delegation | The spawn record (its parent, or the main session, and its `tool_use_id`), or Claude Code's agent list (a row with no parent is read as the main session), with the agent's task known | ◆ LINKED |
+| report → parent | The report came back to the agent's parent | ◆ LINKED |
+| report → a later delegation | 12 or more words of the report appear verbatim in the later prompt | ◆ LINKED (7 to 11 words: ◇ INFERRED) |
+| report → a later delegation | The report and the later prompt name the same path | ◇ INFERRED |
+| report → another agent's later change | The report names the changed file, and that agent could have received it: the author's parent, or an agent spawned after the report (or whose spawn was not seen) | ◇ INFERRED |
+| delegation → the agent's own change | Its prompt names the file it then edited | ◆ LINKED by path, ◇ INFERRED by file name |
+| change → verification | A passed or failed check after the change, that names the file, was run by the same agent, or names no file and ran in its working tree | ◇ INFERRED |
 
-**Matching:**
-- Verbatim text is matched as runs of 7 or more words (and 40 or more characters).
-- Text the author's own prompt already held is ignored, so a briefing the coordinator gave both agents is not taken for
-  forwarding.
-- Order alone never links anything.
+**A trail, sketched.** This illustrates the rules; it is not a capture:
 
-**What stays open (UNRESOLVED):**
-- An *unlinked contribution:* a report that reached nothing captured, from an agent that made no change and ran no
-  check of its own.
-- An *unverified change:* a change with no linked check after its last edit.
-- A command whose latest run failed or was inconclusive.
+```mermaid
+flowchart LR
+  subgraph A["A · Explore"]
+    A1[delegation] --> A3["finding: report"]
+  end
+  subgraph B["B · coder"]
+    B1[delegation] --> B4["change: src/auth/token.ts"]
+  end
+  subgraph C["C · test engineer"]
+    C1[delegation] --> C5["verification: npx vitest run src/auth/token.test.ts · passed"]
+  end
+  A3 ==>|"LINKED · 14 words verbatim in B's prompt"| B1
+  B4 -.->|"INFERRED · the command names token, the file's stem"| C5
+```
 
-**Why it's useful:** it shows whether each subagent's work led anywhere, and which edits were never checked after
-their last change.
+**What stays open (? UNRESOLVED):**
+- **An unlinked contribution:** a report that reached nothing captured, from an agent with no change or check of its
+  own.
+- **An unverified change:** no linked check after the file's last write.
+- **A failing or inconclusive check:** a command whose latest run failed or was inconclusive.
+
+<details>
+<summary><b>How text and paths are matched</b></summary>
+
+- **Verbatim text** is matched as word 7-grams. A match needs at least 7 words and 40 characters, and the longest run
+  wins. It runs on the kept text: the first 2,000 characters of each report and prompt.
+- **A briefing the coordinator gave both agents** doesn't count as forwarding: text already in the author's own prompt
+  is ignored.
+- **Path mentions** in reports and prompts are read with a pattern: directories, then a name with a 1–8 character
+  extension.
+- **A check names a file** by its path, its file name, or its stem as a whole word. The stem must be 4 or more
+  characters, and not a generic one like `index`, `main` or `utils`.
+- **Checks.** Only the latest passed or failed run of each command counts, and at most 3 checks per change. A check
+  from before the last write is kept, but marked as not covering the final version.
+- **Order alone never links anything.**
+
+</details>
+
+### Test verdicts
+
+**A test passes only when the check itself set the exit status.**
+
+A command is split into steps at `&&`, `||`, `|`, `;`, `&` and new lines, with quotes and heredoc bodies blanked out.
+Each step is read by the program at its head, never by words inside it. Then:
+
+| Command | Exit | Verdict | Basis, as the pane shows it |
+| --- | --- | --- | --- |
+| `npx vitest run` | 0 | passed | the tool reported success (no error result) |
+| `npx vitest run` | 1 | failed | the tool reported an error: exit code 1 |
+| `cd api && pytest -q` | 0 | passed | the tool reported success (no error result) |
+| `pytest -q \| tail -5` | 0 | inconclusive | the command exited 0, but its exit status comes from a later step (`tail -5`), not from the check itself |
+| `npm test \|\| true` | 0 | inconclusive | the command exited 0, but its exit status comes from a later step (`true`), not from the check itself |
+| `npm run build \|\| npm test` | 0 | inconclusive | the command exited 0, but the check runs only when an earlier step fails |
+| `npm test &` | 0 | inconclusive | the command exited 0, but the check was sent to the background with & |
+
+- **A leading `cd`.** Trail and Collisions group `cd api && pytest -q` under the `api` directory.
+- **Never passed:**
+  - refused, interrupted, timed-out and backgrounded runs;
+  - a non-zero exit that the tool read as success.
+
+  These are inconclusive, and never failed either.
+- **What verifies a change.** Only passed and failed runs are linked to a change, and only a pass verifies it.
+
+<details>
+<summary><b>The commands it recognises</b></summary>
+
+| Kind | Heads (an excerpt; also via `npx`, `pnpm exec`, `bunx`, `yarn`) |
+| --- | --- |
+| Tests | `pytest`, `jest`, `vitest`, `mocha`, `npm test`, `go test`, `cargo test`, `dotnet test`, `node --test`, `make test`, `mvn test`, `gradle test`, `python -m unittest`, `claude plugin test` |
+| Checks | `tsc`, `eslint`, `ruff`, `mypy`, `pyright`, `npm run lint` / `build` / `typecheck`, `cargo check` / `clippy`, `go vet`, `claude plugin validate` |
+
+The full list is in [the reference](docs/TECHNICAL.md#tool-calls-tests-and-checks).
+
+</details>
 
 ### Collisions
 
-**The matrix.** Files × agents:
-- `W` for writes, with a count;
-- `r` for read only;
-- `×` for only failed or refused edits.
+**Where agents got in each other's way.**
 
-It draws up to 24 files, most writers first, and counts the rest. On a narrow pane some agent columns are left out,
-and it says how many.
+*Use it to* find the usual reasons a swarm's result doesn't hold together: two agents editing the same code, one
+undoing another, or a test run against a moving target.
 
-**The signals** are decided by the session's own event order (no clock windows). Those to investigate are listed
-before those to notice.
+| Signal | Raised when | Label | Severity |
+| --- | --- | --- | --- |
+| Shared write | 2 or more agents wrote the file. *Interleaved* when the order returns to an agent (A → B → A) | ● OBSERVED | investigate if interleaved, else notice |
+| Overwrite | A later write replaced text a different agent wrote: a whole-file Write, or 12 or more characters of the same text | ● OBSERVED / ◆ LINKED | investigate |
+| Stale write | An agent wrote a file it had read, after another agent wrote it in between | ◇ INFERRED | investigate |
+| Worktree divergence | The same relative path was written in 2 worktrees of one repository | ● OBSERVED | notice |
+| Test during change | Another agent's write landed while a test or check was running | ◇ INFERRED | investigate |
+| Repeated failure | A command errored twice or more in one directory, or 2 writes to one path errored | ● OBSERVED | investigate |
+| Contradictory results | The same command in the same directory both passed and failed | ● OBSERVED | investigate if the last run failed, else notice |
 
-| Signal | Raised when | Label |
-| --- | --- | --- |
-| Shared write | two or more agents wrote the file. It is *interleaved* when the order returns to an agent (A → B → A) | OBSERVED |
-| Overwrite | a later write replaced text a different agent wrote (a whole-file Write, or 12 or more characters of the same text) | OBSERVED / LINKED |
-| Stale write | an agent wrote a file it had read, after another agent wrote it in between | INFERRED |
-| Worktree divergence | the same relative path was written in two worktrees of one repository (found with `git rev-parse`) | OBSERVED |
-| Test during change | another agent's write landed while a test or check was running | INFERRED |
-| Repeated failure | a command errored twice or more in one directory, or two writes to one path errored | OBSERVED |
-| Contradictory results | the same command in the same directory both passed and failed | OBSERVED |
+Signals are decided by the session's own event order, with no clock windows.
 
-**Why it's useful:** it finds agents that edited the same code, overwrote each other or tested against a moving
-target. These are the usual reasons a swarm's result does not hold together.
+**The matrix** has a row per file and a column per agent. An illustration (the note after the row is not part of it):
+
+```text
+                          A     B     C
+⇄ src/auth/token.ts       W2    W1    r      ← written by A, then B, then A: an interleaved shared write
+  src/auth/index.ts       r     W1    ·
+  tests/token.test.ts     ·     ×     W1
+```
+
+<details>
+<summary><b>Matrix cells, caps and worktrees</b></summary>
+
+- **Cells:**
+  - `W` is writes, with a count;
+  - `r` is read only;
+  - `×` is only failed or refused edits;
+  - `·` is untouched;
+  - `⇄` marks a file that several agents wrote.
+- **Caps.** The matrix draws up to 24 files, most writers first, and counts the rest. On a narrow pane some agent
+  columns are left out, with a count.
+- **Worktree roots.** They come from `git rev-parse --show-toplevel --git-common-dir`, run only for directories that
+  were written, with a 5 s timeout. Without git, the matrix still works, but no worktree signal can be raised.
+
+</details>
 
 ### Forensics
 
-**The timeline** is every recorded event in order (the latest 1,200), paged to the pane's height, newest page first.
+**Every event, in order, with the evidence behind it.**
 
-**Filters:**
-- **agents:** spawns, starts, stops, turn ends and compactions;
-- **files:** reads, writes and searches;
-- **tests:** test and check runs;
-- **failures:** errors, denials, failed verdicts, and turns that did not end in an answer;
-- **signals:** the events a collision signal rests on;
-- an agent filter on top.
+*Use it to* trace any claim in another view back to the exact events it rests on.
 
-**The selected event's evidence:**
-- the hook and ids it came from;
+**The selected event shows:**
+- its source, for example `tool.call: tool_use_id …, agentId …; result captured`;
 - its paths and access;
 - the command and its kind;
-- the diff excerpt and the result;
-- the basis for the test verdict;
+- the diff excerpt;
+- the result and the verdict's basis;
 - the signals it is part of.
 
-**Why it's useful:** any claim in another view can be traced back to the exact events it rests on.
+<details>
+<summary><b>Filters and paging</b></summary>
+
+- **The timeline** holds the latest 1,200 events, paged to the pane's height, newest page first.
+- **Filters:**
+  - **agents:** spawns, starts, stops, turn ends, compactions;
+  - **files:** reads, writes, searches;
+  - **tests:** test and check runs;
+  - **failures:** errors, denials, failed verdicts, turns that didn't end in an answer;
+  - **signals:** the events a collision signal rests on.
+- **An agent filter** sits on top. It starts on the agent focused in Live.
+
+</details>
 
 ### Spend
 
-**How tokens are counted:**
-- Usage is read from each model request as it completes, in four categories: input, cache read, cache write and
-  output.
-- A request is counted once; repeats are set aside and counted.
-- **Direct** is an agent's own requests. **Subtree** adds its whole spawn tree.
-- The session total adds every agent's direct total, so nothing is counted twice. Spawn-tree figures overlap and are
-  never added.
+**Where the tokens went, and what they bought.**
+
+*Use it to* see which agents spent the most, whether the cache did the work, and how much of the session went to
+checked work.
 
 **Spend vs outcome** puts each agent's tokens in one bucket:
 
 | Bucket | When |
 | --- | --- |
-| verified | every change it made has a linked check that passed after the change's last edit, or its own passing check covers a linked change's final version |
-| changed but unverified | a change has no linked check after its last edit |
-| failed or inconclusive | a linked check after the last edit failed, or that command's latest run failed or was inconclusive, or the agent's own check ended that way |
-| report only | a report, and no change or check |
-| unresolved | nothing decides it (and tokens no agent can be tied to) |
-| mixed | more than one of the above |
-| coordinator | the main session's own tokens |
-| no usage recorded | an agent with no request that reported usage |
+| verified | Each change has a linked check that passed after its last edit, none failed after it, and that command's latest run passed; each check it ran passed last and covers a linked change's final version |
+| changed but unverified | A change has no linked check after its last edit |
+| failed or inconclusive | A linked check after the last edit failed, that command's latest run failed or was inconclusive, or its own check's latest run did |
+| report only | A report, and no change or check |
+| unresolved | Nothing decides it (and tokens no agent can be tied to) |
+| mixed | More than one of the above |
+| coordinator | The main session's own tokens |
+| no usage recorded | No request that reported usage |
 
-The denominator is stated: the session's tokens processed.
+**The denominator** is stated: the session's tokens processed (input + cache read + cache write + output). Cache
+reads usually dominate it, so a share is a share of tokens processed, not of cost.
 
-**The ≈$ estimate:**
-- It is off until you turn it on in Spend.
-- It prices tokens at dated list prices built into the mod: API-equivalent, not a charge, and not what a subscription
-  costs.
-- A model without a price is named and left out, and the figure reads `≈$X+`.
-- Usage does not say how long a cache write lasts, so the main loop's writes are priced as 1-hour and subagents' as
-  5-minute.
-- To use your own prices, point `SWARM_AUTOPSY_PRICES` at a JSON file ([format](docs/TECHNICAL.md#prices)).
+<details>
+<summary><b>The token ledger</b></summary>
 
-**Why it's useful:**
-- which agents spent the most;
-- whether the cache did the work;
-- what share of the session went to work that was checked.
+- **Source.** Usage comes from each model request as it completes (`turn.step`), in four categories: input, cache
+  read, cache write and output.
+- **Counted once.** A request is keyed by turn and index, and repeats are set aside and counted. Side requests the
+  hook can't see (such as a compaction summary) are not included.
+- **Direct and subtree.** **Direct** is an agent's own requests. **Subtree** adds its whole spawn tree.
+- **The session total** adds every agent's direct total, so nothing is counted twice. Spawn-tree figures overlap and
+  are never added.
+- **Cross-check.** Each turn's reported totals are compared with the requests counted, and never added.
+
+</details>
+
+<details>
+<summary><b>The ≈$ estimate (opt-in)</b></summary>
+
+- **Off by default.** It stays off until you turn it on in Spend.
+- **What it is.** Tokens priced at the dated list prices built into the mod. It is API-equivalent: not a charge, and
+  not a subscription's cost.
+- **Cache writes.** Usage doesn't say how long a cache write lasts, so the main loop's writes are priced as 1-hour
+  (2× input) and subagents' as 5-minute (1.25× input).
+- **Missing prices.** A model without a price is named, and the figure reads `≈$X+`.
+- **Claude Code's own figure.** When present, it is shown beside the estimate, and never added.
+- **Your own prices.** Point `SWARM_AUTOPSY_PRICES` at a JSON file ([format](#configuration)).
+
+</details>
 
 ### Health
 
-**What it gathers.** The findings the other analyses already made, in six groups:
+**One list of what to look at.**
+
+Health gathers what the other analyses already found, in six groups:
 1. trail flags;
 2. collision signals;
 3. context;
@@ -297,11 +478,11 @@ The denominator is stated: the session's tokens processed.
 5. spend vs outcome;
 6. coverage gaps (what the collector could not see).
 
-Each finding keeps its source's label, its agents and its events. Health adds no score or threshold, and detects
-nothing new except the coverage gaps.
+**Each finding** keeps its source's label, agents and events. It opens its evidence, and can take you to its agent in
+Live or its step in Trail.
 
-**Why it's useful:** it is one list of what to look at. Each finding opens its evidence, and can take you to its agent
-in Live or its step in Trail.
+**No verdict of its own.** Health has no score, threshold or traffic light, and it detects nothing new except the
+coverage gaps.
 
 ## The desktop look
 
@@ -348,22 +529,6 @@ Each scene draws the main session's context as part of the picture (here at 62%)
 
 ![The six Spooky scenes](docs/images/spooky.png)
 
-## Reading the evidence labels
-
-| Label | Glyph | Meaning |
-| --- | --- | --- |
-| OBSERVED | ● | Reported directly by an event, message, command result or tool result. |
-| LINKED | ◆ | Connected by explicit identifiers: a spawn's parent, `agentId` on the agent's own events, a verbatim excerpt of one agent's report in another's delegation prompt, a delegation prompt naming the exact path the agent then edited, or an edit replacing text another agent wrote. |
-| INFERRED | ◇ | Plausible from indirect evidence: a shared path or file stem plus event order. A candidate, not proof. |
-| UNRESOLVED | ? | Not enough evidence to decide: an *unlinked contribution*, an *unverified change*, a latest test run that failed. |
-| UNAVAILABLE | ∅ | The interface does not expose it: a subagent's context %, the task of an agent spawned before the mod loaded. |
-
-Numbers carry a simpler label:
-- **OBSERVED ●:** read from an event.
-- **ESTIMATED ≈:** computed from a stated assumption, such as a ≈$ figure, or a subagent's % on the same model as the
-  main session.
-- **UNAVAILABLE ∅:** not exposed or not yet captured.
-
 ## What it deliberately does not do
 
 - **Model calls:** it never calls a model, so it cannot invent connections. Every link comes from a fixed rule over
@@ -378,117 +543,308 @@ Numbers carry a simpler label:
   on `/clear`. Only your scene, music and glass choices are kept across sessions, in the mod's own store. `export`
   writes a file only when you ask.
 
-## How it works
+## Export and scripting
 
-Swarm Autopsy is a Claude Code mod built on the function-hooks API. It is one TypeScript module,
-`swarm-autopsy/hooks/register.tsx`, which Claude Code loads into the session. It has no build step, no npm
-dependencies and no server.
+`/swarm-autopsy export` writes the whole record and every analysis to one JSON file,
+`swarm-autopsy-export-<time>.json`, in the session's root. An abridged view:
+
+```jsonc
+{
+  "kind": "swarm-autopsy-export",
+  "exportedAt": …,
+  "note": "Observed session data and its deterministic analysis; see README for the evidence labels.",
+  "snapshot": { "version": 3, "agents": {…}, "events": […], "ledger": {…}, … },
+  "analysis": {
+    "trail": { "lanes": […], "edges": […], "flags": […], "outcome": {…} },
+    "collisions": { "files": […], "totalFiles": …, "agents": […], "signals": […] },
+    "ledger": { "rows": […], "session": {…}, "priceTable": {…}, "notes": […] },
+    "spend": { "agents": […], "buckets": […], "denominator": …, "denominatorBasis": "…" },
+    "health": […],
+    "prices": {…}
+  }
+}
+```
+
+**Recipes with `jq`:**
+
+```bash
+# Every collision signal: what, how sure, how urgent, which files
+jq '.analysis.collisions.signals[] | {kind, evidence, severity, paths}' swarm-autopsy-export-*.json
+
+# Every LINKED edge in the trail, with the rule that drew it
+jq '.analysis.trail.edges[] | select(.evidence == "LINKED") | {from, to, basis}' swarm-autopsy-export-*.json
+
+# What is still open: unlinked reports, unverified changes, failing or inconclusive checks
+jq '.analysis.trail.flags[] | select(.evidence == "UNRESOLVED") | {kind, agentId, text}' swarm-autopsy-export-*.json
+
+# Every test or check run, its verdict, and why
+jq '.snapshot.events[] | select(.tool.verification) | {agentId, command: .tool.command, verdict: .outcome.verdict, basis: .outcome.verdictBasis}' swarm-autopsy-export-*.json
+
+# Tokens per agent (direct), largest first
+jq '.analysis.ledger.rows | sort_by(-.direct.processed) | .[] | {label, processed: .direct.processed, requests: .direct.requests}' swarm-autopsy-export-*.json
+
+# Where the tokens went, by outcome
+jq '.analysis.spend.buckets[] | {bucket, processed, percent}' swarm-autopsy-export-*.json
+```
+
+**Notes:**
+- The ≈$ estimates are always included, labelled ESTIMATED.
+- An export holds the captured text as it is, without redaction, so treat it like a transcript.
+- To export automatically, set `SWARM_AUTOPSY_EXPORT` (see [Configuration](#configuration)).
+
+### The schema
+
+The record is one JSON value. Here is an abridged excerpt of [`types/index.d.ts`](swarm-autopsy/types/index.d.ts):
+
+```ts
+type Evidence = 'OBSERVED' | 'LINKED' | 'INFERRED' | 'UNRESOLVED' | 'UNAVAILABLE'
+
+type Snapshot = {
+  version: 3
+  sessionId?: string
+  rev: number                           // bumped by every change; keys the cached analyses
+  agents: Record<string, AgentRecord>   // 'main' and every subagent
+  agentOrder: string[]
+  events: ForensicEvent[]               // the latest 1,200
+  droppedEvents: number
+  roots: Record<string, string | null>  // directory → git worktree root
+  ledger: LedgerState                   // every model request's usage
+  context?: ContextReading              // the main session's session.measure reading
+  compactionMarks: CompactionMark[]
+  notes: string[]
+}
+
+type ForensicEvent = {
+  seq: number                           // the order every rule uses
+  kind: EventKind                       // 'spawn' | 'turn-start' | 'turn-end' | 'tool' | 'agent-stop' | …
+  agentId: string
+  summary: string
+  source: string                        // the hook and the ids it came from
+  tool?: ToolFacts                      // access, paths, command, edit excerpt, test or check
+  outcome?: ToolOutcome                 // status, exit code, verdict, verdictBasis
+}
+
+type AgentRecord = {
+  id: string
+  label: string                         // 'main', 'A', 'B', …
+  type?: string
+  description?: string                  // the task, as delegated
+  parentId?: string
+  parentEvidence: Evidence
+  state: 'active' | 'completed' | 'failed' | 'stopped' | 'unknown'
+  report?: AgentReport
+  counts: { tools: number; reads: number; writes: number; execs: number; errors: number }
+}
+```
+
+## Configuration
+
+| Variable | Effect |
+| --- | --- |
+| `SWARM_AUTOPSY_PRICES` | A JSON price table for ≈$, read when the session starts. A bad file is reported, naming the field, and the built-in table is used |
+| `SWARM_AUTOPSY_EXPORT` | A path. The export is written there after each main turn and at the session's end |
+
+**A price table:**
+
+```json
+{
+  "date": "2026-10-06",
+  "source": "Where these prices come from",
+  "cacheWriteTtl": { "mainLoop": "1h", "subagents": "5m" },
+  "models": [
+    {
+      "model": "claude-sonnet-5-5",
+      "inputPerMTok": 2,
+      "outputPerMTok": 10,
+      "cacheReadPerMTok": 0.2,
+      "cacheWritePerMTok": 2.5,
+      "cacheWrite1hPerMTok": 4
+    }
+  ]
+}
+```
+
+- **Required:**
+  - `date`, a real day as YYYY-MM-DD;
+  - `source`;
+  - `models`, a non-empty list. Each entry gives `model` and the four rates, in USD per million tokens.
+- **Optional:**
+  - `cacheWrite1hPerMTok` (2× input when left out);
+  - `large`, rates for prompts over 100K tokens;
+  - `note`, `assumptions` and `cacheWriteTtl`.
+
+All the rules are in [the reference](docs/TECHNICAL.md#prices).
+
+**What it keeps:**
+
+| Where | What | For how long |
+| --- | --- | --- |
+| Session state, key `snapshot` | The session record | The session; reset on `/clear` or a resume |
+| Session state, key `ui` | The tab, filters, selection, parts, the ≈$ switch | The session |
+| The mod's store: `mood`, `glass`, `sound`, `music-owner` | Mode and scene, transparency, play and volume, which chat plays | Across sessions |
+| `<session root>/swarm-autopsy-export-<time>.json` | An export | Until you delete it |
+
+## FAQ
+
+**Does it slow my session down?**
+- **Per event:** the collecting hooks add an in-memory update and pass every result through unchanged. Model responses
+  stream straight through.
+- **Slower work** (git, the agent list, writing the record) runs on a 250 ms background tick.
+- **At the edges:** session start waits for the mod's setup, which includes looking for an audio player. Session end
+  waits for the optional export.
+
+**Does it send my code anywhere?** No. It makes no network calls and no model calls.
+- **Files.** It writes one only for an export: on command, or to `SWARM_AUTOPSY_EXPORT` if you set it.
+- **Captured text** stays in session state, which any mod in the session can read. An export holds it unredacted.
+
+**Can I run it on a session that already happened?** No. It records live, from the moment the session loads the mod.
+Agents already running when it loads are adopted, and earlier activity is noted as missed.
+
+**Why does my test say "inconclusive"?** Its captured result can't be read as the check's own pass or fail. It could
+be:
+- a later step (`| tail`, `|| true`, `; echo`);
+- a check that runs only after `||`;
+- a background `&`;
+- a refusal, an interruption or a timeout;
+- a non-zero exit that the tool read as success;
+- an error with no exit code.
+
+See [Test verdicts](#test-verdicts).
+
+**Why is a subagent's context marked ≈ or ∅?** Claude Code reports only the main session's window to mods.
+- **≈:** estimated from the subagent's latest prompt and a known window.
+- **∅:** no usage yet, no known window for its model, or a prompt larger than that window.
+
+**Can it miss things?** Yes, and it says so:
+- **In Health:** activity before it loaded, and events past the 1,200 kept, appear as coverage gaps.
+- **In Trail:** an agent whose spawn was not seen, and whose parent and task Claude Code's agent list did not supply,
+  gets a ∅ flag.
+- **In Spend:** requests that came back without usage are counted.
+
+**Does it work in the terminal?** Yes, with the same six views and evidence, in a classic look, with hotkeys 1–6.
+
+**How do I remove it?** Run:
+
+```bash
+claude plugin uninstall swarm-autopsy@swarm-autopsy
+```
+
+**Found a bug or have an idea?** [Open an issue](https://github.com/agryu-in/swarm-autopsy-claude-mod/issues).
+
+## Architecture
+
+Swarm Autopsy is a Claude Code mod built on the function-hooks API:
+- **One module.** It is one TypeScript module, [`hooks/register.tsx`](swarm-autopsy/hooks/register.tsx), which Claude
+  Code loads into the session.
+- **No build, no dependencies.** It runs as it is. Its only import is the engine's own `claude-code` module, and it
+  needs no server.
 
 ```mermaid
 flowchart LR
-  E["Claude Code session events"] -->|"hooks observe, then pass every result through"| R["Session record"]
-  R -->|"once per change"| A["Analyses<br/>trail · collisions · ledger · context · outcome · health"]
+  E["Claude Code session events"] -->|"hooks observe, then pass every result through"| R["Session record<br/>(session state)"]
+  R -->|"fixed rules, no model calls"| A["Analyses<br/>trail · collisions · ledger · context · outcome · health"]
   A --> V["Views<br/>Live · Trail · Collisions · Forensics · Spend · Health"]
-  V -->|terminal| T["Engine tree, classic look"]
+  V -->|terminal| T["The engine's element tree, classic look"]
   V -->|"desktop app"| D["Two Clients: still scene behind, content in front"]
 ```
 
-### What it listens to
+**A hook, end to end.** Every collecting hook wraps the engine's own step and hands its result back untouched:
+
+```mermaid
+sequenceDiagram
+  participant CC as Claude Code
+  participant H as Swarm Autopsy hook
+  participant N as next(e): the engine runs the tool
+  CC->>H: tool.call
+  H->>H: record the call's facts (in memory)
+  H->>N: next(e)
+  N-->>H: result
+  H->>H: record the outcome and the verdict
+  H-->>CC: the same result, unchanged
+```
+
+**If the mod fails:**
+- The hooks on `agent.spawn`, `tool.call`, the subagent events and `session.compact` carry a `.catch` that passes the
+  event on untouched.
+- Model responses (`turn.step`) stream straight through.
+- A view that fails to draw shows its reason instead of a blank pane.
 
 | Hook | What it gives the mod |
 | --- | --- |
-| `agent.spawn` | Who spawned whom, with the spawn's `tool_use_id`, the prompt, the description, the type and the new agent's id |
+| `agent.spawn` | Who spawned whom (parent, `tool_use_id`), the prompt, description, type and the new agent's id |
 | `turn.start`, `turn.complete` | Each agent's turns, its report, and how each turn ended |
-| `turn.step` | Each model request's usage, as it completes: the token ledger's only source |
-| `tool.call` | Every tool call the engine raises, except Agent, Task and Workflow (so a subagent's own calls stay visible): paths, edits, commands and their results |
+| `turn.step` | Each model request's usage as it completes: the token ledger's only source |
+| `tool.call` | Every tool call the engine raises, except Agent, Task and Workflow (so a subagent's own calls stay visible) |
 | `classic.SubagentStart`, `classic.SubagentStop` | Subagents starting and stopping, and their last message |
-| `session.compact`, `session.measure` | Compactions; the main session's context reading and Claude Code's own cost figure |
-| `session.start`, `session.end`, `command.run`, `ui.render`, `ui.message`, `ui.fault` | Setup and reset, `/swarm-autopsy`, and drawing the pane |
+| `session.compact`, `session.measure` | Compactions; the main session's context reading and Claude Code's cost figure |
+| `session.start`, `session.end` | Setup, and a reset on `/clear` or a resume |
+| `command.run`, `ui.render`, `ui.message`, `ui.fault` | `/swarm-autopsy`, drawing the pane, presses inside the desktop content, a refused Client |
 
-**Pass-through.**
-- Every collecting hook records what it saw, then returns the engine's own result unchanged. Model responses stream
-  through as they arrive.
-- If the mod's own code fails, the event goes on untouched.
-- Slower work runs on a 250 ms background tick, off the session's path: git lookups, refreshing the agent list, and
-  routine writes of the record.
+<details>
+<summary><b>Budgets and caps</b></summary>
 
-### The session record
-
-**Where it lives.** In Claude Code's session state. It survives `/reload-plugins` and starts afresh on `/clear` or a
-resume. It is written at most once a second.
-
-**Caps.** They keep it small:
-
-| What | Kept |
+| What | Value |
 | --- | --- |
-| Events | the latest 1,200 |
-| Delegation prompts and reports | 2,000 characters each |
-| Commands | 400 characters |
-| Tool output | 600 characters |
-| Edit excerpts | 1,200 characters per side |
+| Background tick (git, the agent list, record writes) | 250 ms |
+| Writing the record to session state | At most once a second on the tick; at once when `/swarm-autopsy` runs, at session start, and after `/clear` or a resume |
+| Analyses (trail, collisions, ledger, spend, Health) | Once per revision of the record and ≈$ setting, not per redraw; context gauges are worked out per drawing |
+| Hold after a press | 20 s |
+| Render budget | 10 s, then the pane draws the reason |
+| `git rev-parse` timeout | 5 s |
+| Events kept | The latest 1,200; older ones are counted |
+| Delegation prompts, reports | 2,000 characters each |
+| Commands / tool output / edit excerpts | 400 / 600 / 1,200 per side characters |
+| Desktop Client tree | 100,000 characters, 2,000 nodes, depth 32 |
 
-**Analyses** are computed once per revision of the record, not on every redraw.
+</details>
 
-**Tool calls** are sorted by tool:
-- **reads:** Read, NotebookRead, LSP;
-- **writes:** Edit, Write, MultiEdit, NotebookEdit;
-- **searches:** Glob, Grep, LS;
-- **commands:** Bash, PowerShell.
+<details>
+<summary><b>Drawing on the terminal and the desktop</b></summary>
 
-**Tests and checks.** A command counts as a test or a check by the program at the head of one of its steps: `pytest`,
-`jest`, `vitest`, `npm test`, `go test`, `cargo test`, `tsc`, `eslint`, `ruff`, `mypy`, `npm run lint`/`build` and so
-on. Words inside a step don't count. [The full list](docs/TECHNICAL.md#tool-calls-tests-and-checks).
+**Two terms first:**
+- **The engine tree:** Claude Code's own element tree (Box, Text, Button…), which the terminal and the app draw.
+- **A Client:** a surface module that the desktop app runs in its page, drawing its own tree.
 
-### Drawing the pane
-
+**How it is drawn:**
 - **The layout follows the width:** compact below 56 columns, medium, and wide from 100.
-- **In the terminal,** it draws Claude Code's own element tree in a classic theme.
-- **In the desktop app,** the pane is exactly the visible height. It is built from two Clients (surface modules) and the
-  toolbar:
-  - behind, one Client draws the still scene;
-  - at the top, the toolbar stays fixed, drawn with the app's own controls;
-  - in front, a second Client draws the header and the selected tab, scrolling in its own region.
+- **On the terminal:** the engine tree in a classic theme, with tabs on hotkeys 1–6.
+- **On the desktop:** the pane is exactly the visible height.
+  - Behind, a Client ([`scene-client.ts`](swarm-autopsy/hooks/ui/client/scene-client.ts)) draws the still scene.
+  - At the top, the toolbar stays fixed, drawn with the app's own controls.
+  - In front, a second Client ([`content-client.ts`](swarm-autopsy/hooks/ui/client/content-client.ts)) draws the
+    header and the selected tab, scrolling in its own region.
+- **Presses.** A press inside the content posts the button's key back through `ui.message`, and the hooks module runs
+  that button's own handler.
 
-  A press inside the content posts the button's key back to the hooks module, which runs that button's own handler.
-- **Keeping within the page's limits:**
-  - Every tree is mended to the desktop page's schema before it leaves, since one element the page refuses would blank
-    the whole drawing.
-  - A view past a Client's bounds (100,000 characters, 2,000 nodes) comes in parts.
-  - If the app refuses a Client, the pane falls back to the engine tree with a note, then retries after 2, 6 and 20
-    seconds.
-- **Held while you browse.** A press holds the drawing's data for 20 seconds, so the line you are about to press doesn't
-  move. **⏸ pause** holds it until you resume.
-- **Every drawn string is cleaned:** colour escapes are removed, other control characters become spaces, and sizes
-  are bounded. If a view still fails, the pane says which view and why, instead of going blank.
+**Within the page's limits:**
+- **`fitPage`** makes every tree fit the desktop page's schema before it leaves, since one refused element blanks the
+  whole drawing.
+- **Parts.** A view past a Client's bounds comes in parts, with a pager at the list's ends.
+- **Fallback.** If the app refuses a Client (`ui.fault`), the pane falls back to the engine tree with a note, then
+  retries after 2, 6 and 20 s.
+- **Clean strings.** Colour escapes are removed and other control characters become spaces: one stray byte in captured
+  output would make the engine refuse the drawing.
 
-### Scenes and music
+</details>
 
-- **Scenes are SVG built in code.**
-  - They are deterministic, seeded by the scene's id.
-  - They are animated with SVG animation, so nothing redraws to move them.
-  - They are rebuilt only when the pane's size, the context fill or the number of active subagents changes.
-  - Each active subagent adds one figure, up to 9.
+<details>
+<summary><b>Scenes and music</b></summary>
+
+**Scenes** are SVG strings built in code ([`hooks/art/`](swarm-autopsy/hooks/art)):
+- **Deterministic:** seeded by the scene's id (mulberry32).
+- **Animated** with SVG animation, so nothing redraws to move them.
+- **Rebuilt,** on the still pane, only when the scene, the pane's size, the context fill or the count of active
+  subagents changes. The engine-tree fallback redraws it with the pane.
+- **Figures:** one per active subagent, up to 9.
 - **Colours** are computed in OKLCH. Tests hold every scene's text to 4.5:1 contrast on its glass.
-- **Music:**
-  - **Where PulseAudio's `paplay` works** (normally Linux): `paplay`, under its own client name, so a volume change
-    through `pactl` touches only its stream.
-  - **Otherwise, on macOS:** Claude Code's own audio player.
-  - **One chat plays at a time.** The owner renews a heartbeat in the mod's store every 3 seconds. Another chat takes
-    over 10 seconds after it stops.
 
-### What it stores, reads, writes and runs
+**Music:**
+- **Players.** `paplay` where PulseAudio works, under its own client name, so `pactl` volume changes touch only its
+  stream. Otherwise, on macOS, Claude Code's audio player.
+- **One chat plays at a time.** The owner renews a heartbeat in the mod's store every 3 s. Another chat takes over 10 s
+  after it stops.
 
-| Where | What |
-| --- | --- |
-| **Session state** | The session record and the pane's state (tab, filters, selection, the ≈$ switch) |
-| **The mod's store** (kept across sessions) | `mood` (mode and scene), `glass` (transparency), `sound` (play and volume), `music-owner` |
-| **Files written** | Only an export: `/swarm-autopsy export` writes `swarm-autopsy-export-<time>.json` in the session's root |
-| **Files read** | Only the price file, if you set `SWARM_AUTOPSY_PRICES`. The music player plays the mod's own tracks from `music/` |
-| **Processes run** | `git rev-parse` (worktree roots, for directories that were written); for music, `uname`, `pactl` and `paplay` |
-| **Environment** | `SWARM_AUTOPSY_PRICES`: a JSON price table for ≈$. `SWARM_AUTOPSY_EXPORT`: a path to write the export to after each main turn and at the session's end |
-
-An export is `{kind, exportedAt, note, snapshot, analysis}`: the full record and every analysis, with ≈$ always
-included.
+</details>
 
 ## Known limitations
 
@@ -499,18 +855,19 @@ included.
   Trail, Collisions and Forensics cover the events kept.
 - Path mentions in reports are read with a pattern, so a link from a shared file name is INFERRED, never proof.
 - The desktop scenes use the desktop app's drawing surface. Other surfaces draw the classic look.
-- Where an organization manages Claude Code, the `classic.SubagentStart`, `classic.SubagentStop` and `session.compact`
-  hooks run only for plugins its managed settings list (as `claude plugin validate` reports). Installed by a person
-  there, the mod still sees spawns, turns, usage and tool calls, but not subagent starts and stops or compactions.
+- **Managed settings.** Where an organization manages Claude Code, the `classic.SubagentStart`,
+  `classic.SubagentStop` and `session.compact` hooks run only for plugins its managed settings list (as
+  `claude plugin validate` reports).
+  - Installed by a person there, the mod still sees spawns, turns, usage and tool calls.
+  - It does not see subagent starts and stops, or compactions.
 - **Captured text is not redacted.** Captured prompts, reports, commands and output excerpts are kept in session state,
-  which Claude Code lets any mod in the session read. An export writes them as they are, so treat an export like a
-  transcript.
-- **A subagent's context % is an estimate:** Claude Code does not expose a subagent's window to mods. It is UNAVAILABLE
-  for a model the mod has no window for.
-- **The built-in ≈$ prices are dated** (2026-10-06). For other prices, set `SWARM_AUTOPSY_PRICES`.
+  which Claude Code lets any mod in the session read. An export writes them as they are.
+- **A subagent's context % is an estimate.** It is UNAVAILABLE for a model the mod has no window for. That includes a
+  model id with a date suffix, unless it is the main session's model.
+- **The built-in ≈$ prices are dated** 2026-10-06. For other prices, set `SWARM_AUTOPSY_PRICES`.
 - **Long lists are capped** to keep the pane fast:
-  - Collisions draws up to 24 files and counts the rest.
-  - Live draws 40 agents before "N more agents".
+  - Collisions draws 24 files;
+  - Live draws 40 agents before "N more agents";
   - Spend lists 20 rows before a disclosure.
 
 ## Develop
@@ -528,19 +885,24 @@ claude plugin test ./swarm-autopsy
 To type-check: load the mod once (for example with `claude --plugin-dir ./swarm-autopsy`), which writes its types into
 `swarm-autopsy/.claude-plugin/types/`, then run `npx tsc -p swarm-autopsy`.
 
-**The tests.** There are 559 tests in 24 files. They cover:
-- every analysis rule;
-- every view at several widths, on both the terminal and the desktop;
-- the desktop page's rules (`tests/page-rules.ts` mirrors its validator);
-- the art rules for all twelve scenes;
-- colour contrast;
-- the music's one-player rule.
+### The tests
 
-**The layout:**
+559 tests in 24 files, run in Claude Code's own test host:
+
+| Files | Cover |
+| --- | --- |
+| `acceptance` | The whole pane, every tab, both surfaces, several widths; no judging words; a label on every figure |
+| `analysis`, `classify`, `reduce`, `signals`, `collector` | Trail and Collisions rules, reading tool calls and commands, the record, Health, the hooks through the host |
+| `context`, `ledger`, `outcome` | Context estimates, the token ledger and prices, spend vs outcome |
+| `ui-*`, `header-cards` | Each view, the shared kit, scene colours and contrast, the summary cards at every width |
+| `client-page`, `page-fit`, `still-*` | The desktop page's rules (`tests/page-rules.ts` mirrors its validator), `fitPage`, parts, fault and retry |
+| `art`, `music` | Every scene against the art rules (ids, references, no scripts, size, determinism); the one-player rule |
+
+### The layout
 
 ```text
 swarm-autopsy/
-├── .claude-plugin/plugin.json   the manifest (version 1.0.0)
+├── .claude-plugin/plugin.json   the manifest (1.0.0)
 ├── hooks/hooks.json             names the one module
 ├── hooks/register.tsx           the hooks, the command, the render hook, the stored settings
 ├── hooks/music.ts               the music player
@@ -553,7 +915,19 @@ swarm-autopsy/
 └── types/index.d.ts             the record's and the pane's state types
 ```
 
-**Every rule, threshold, cap and file** is in the [technical reference](docs/TECHNICAL.md).
+### Where things live
+
+| To change | Look in |
+| --- | --- |
+| What is recorded from each hook | `hooks/register.tsx`, `hooks/lib/collect.ts`, `hooks/lib/reduce.ts` |
+| Tool access kinds, test and check heads, verdicts | `hooks/lib/classify.ts`, `hooks/lib/command.ts` |
+| Trail edges and verbatim matching | `hooks/lib/trail.ts`, `hooks/lib/excerpt.ts` |
+| Collision signals | `hooks/lib/collisions.ts` |
+| Token ledger, context, prices | `hooks/lib/ledger.ts`, `hooks/lib/context.ts`, `hooks/lib/pricing.ts` |
+| Spend vs outcome, Health | `hooks/lib/outcome.ts`, `hooks/lib/signals.ts` |
+| The desktop still pane | `hooks/ui/client/` |
+
+Every rule, threshold, cap and file is in the **[technical reference](docs/TECHNICAL.md)**.
 
 ## Credits and licence
 
