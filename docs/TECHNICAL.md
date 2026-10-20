@@ -576,8 +576,7 @@ references.
 - **One chat plays at a time.** The owner is stored as `music-owner` in the mod's store. It renews a heartbeat every
   3 s, and each chat checks every 1.5 s. A heartbeat older than 10 s lets another chat take over, and a chat that ends
   releases the music.
-- **Volume** has five steps: 14%, 24%, 36%, 52% and 72% of full volume for `paplay` (default: step 2, 24%). On macOS
-  the gain is 1.4× those.
+- **Volume** has five steps: 14%, 24%, 36%, 52% and 72% of full volume for `paplay` (default: step 2, 24%).
 
 ## What it stores, reads, writes and runs
 
@@ -640,7 +639,6 @@ swarm-autopsy/
 │   │   └── clarity.ts, music.ts, format.ts                  transparency steps, the one-player rule, number formats
 │   ├── ui/                      the views, as an engine tree
 │   │   ├── pane.tsx, common.tsx, kit.tsx, glass.tsx          shell, tabs, shared parts, toolbar and glass
-│   │   ├── bars.tsx, press.tsx, svg.ts                       bars, pressable lines, the ring and sparkline pictures
 │   │   ├── live*.tsx, trail*.tsx, trail-model.ts, trailmap.ts, collisions.tsx, forensics.tsx, events.tsx,
 │   │   │   spend*.tsx, ledger.tsx, outcome.tsx, health*.tsx, context.tsx     one view each
 │   │   ├── bars.tsx, press.tsx, svg.ts                        bars, press targets (a card line), desktop vector marks
