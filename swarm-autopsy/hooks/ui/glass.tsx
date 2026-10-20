@@ -1,10 +1,9 @@
 // Glass surfaces: the glass panel props, panels and pills in the active theme's
-// colours, the pane's solid background and the scene behind it (the meadow
-// layout: a scene that fades into the background, its pickers above it), and the
-// header's live dot. Translucent colours are
-// drawn on the desktop only: the terminal paints alpha hex as opaque slabs
-// (R1 §2.4), so `glass()` gives it a plain round border and no fill. Lead-owned;
-// the kit re-exports everything here.
+// colours, the pane's solid background and the scene behind it (a scene that
+// fades into the background, its pickers above it), and the header's live dot.
+// Translucent colours are drawn on the desktop only: the terminal paints alpha
+// hex as opaque slabs, so `glass()` gives it a plain round border and no fill.
+// The kit re-exports everything here.
 
 import type { RenderChildren } from 'claude-code'
 
@@ -27,7 +26,7 @@ const fillOf = (tone: GlassTone): string => (tone === 'raised' ? GLASS.raised : 
 
 export type GlassProps = { borderStyle: 'round'; borderColor: string; backgroundColor?: string }
 
-/** Whether this surface paints the Sunset Glass atmosphere and translucency (the desktop, never the terminal). */
+/** Whether this surface paints the glass atmosphere and translucency (the desktop, never the terminal). */
 export function paintsGlass(ctx: ViewContext): boolean {
   return ctx.surface !== 'terminal'
 }
@@ -134,7 +133,7 @@ const WHERE_TEXT: Record<string, string> = {
   unavailable: 'no audio player',
 }
 
-/** From this many columns the toolbar puts Mode and Scene on one row; narrower panes stack them, as meadow does. */
+/** From this many columns the toolbar puts Mode and Scene on one row; narrower panes stack them. */
 export const TOOLBAR_ONE_ROW = 70
 
 /** The toolbar's rows on the desktop: its controls' rows and its frame (border, padding, the gap under it). */

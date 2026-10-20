@@ -1,4 +1,4 @@
-// F2 · API-equivalent price estimates (definition 6). A dated list-price
+// The token ledger's API-equivalent price estimates. A dated list-price
 // table, an exact model-id match, and a strict parser for a table the person
 // supplies. Every figure is ESTIMATED: never an actual charge, never what a
 // Claude subscription costs. Pure; no `$`, no network.
@@ -63,7 +63,7 @@ function price(model: string, input: number, output: number, cacheRead: number):
   return { model, ...rates(input, output, cacheRead) }
 }
 
-/** List prices as of 2026-10-06 (docs/vnext-contract.md §5). */
+/** List prices as of 2026-10-06. */
 export const PRICE_TABLE: PriceTable = {
   date: '2026-10-06',
   source:

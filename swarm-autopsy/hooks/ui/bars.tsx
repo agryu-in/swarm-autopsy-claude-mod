@@ -1,9 +1,8 @@
-// Sunset Glass bars (docs/sunset-glass/DESIGN-CONTRACT.md §8, SG-5): the cell
-// arithmetic every bar shares, and the block bars that stand on their own line.
-// On the desktop a block bar is a row of Box segments sized by integer weights,
-// so it can never overflow its slot the way a proportional `█` does (R1 §5.2);
-// on the terminal it is coloured `█` text, exact to the cell. Lead-owned; the
-// kit re-exports everything here. Pure: arithmetic over the values given.
+// Bars: the cell arithmetic every bar shares, and the block bars that stand on
+// their own line. On the desktop a block bar is a row of Box segments sized by
+// integer weights, so it can never overflow its slot the way a proportional `█`
+// does; on the terminal it is coloured `█` text, exact to the cell. The kit
+// re-exports everything here. Pure: arithmetic over the values given.
 
 import type { SpendOutcome } from '../../types'
 import { BUCKET_ROLE, GLASS, ROLE, withAlpha } from '../lib/palette'
@@ -148,7 +147,7 @@ export function ShareBar(ctx: ViewContext, fraction: number, cells: number, role
 const UNKNOWN_TAIL_CELLS = 2
 
 /**
- * F3's spend vs outcome as one bar (§8): every bucket with recorded usage in its colour, then a `░` tail when some
+ * Spend vs outcome as one bar: every bucket with recorded usage in its colour, then a `░` tail when some
  * agents' usage is unknown (never drawn as a share). `cells` is the whole width, tail included. Nothing when no tokens
  * were processed. Shared by the Trail's outcome box and Spend.
  */

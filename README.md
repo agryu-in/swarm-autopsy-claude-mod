@@ -1,7 +1,7 @@
 # Swarm Autopsy · Claude Mod
 
-[![version 1.0.0](https://img.shields.io/badge/version-1.0.0-6d5bd0)](https://github.com/agryu-in/swarm-autopsy-claude-mod/releases/tag/v1.0.0)
-![559 tests](https://img.shields.io/badge/tests-559-2ea44f)
+[![version 1.0.1](https://img.shields.io/badge/version-1.0.1-6d5bd0)](https://github.com/agryu-in/swarm-autopsy-claude-mod/releases/tag/v1.0.1)
+![564 tests](https://img.shields.io/badge/tests-564-2ea44f)
 ![0 dependencies](https://img.shields.io/badge/dependencies-0-0a7bbb)
 ![0 model calls](https://img.shields.io/badge/model%20calls-0-0a7bbb)
 ![0 network calls](https://img.shields.io/badge/network%20calls-0-0a7bbb)
@@ -98,22 +98,24 @@ At the prompt of a Claude Code terminal session:
 
 Answer `y` to add the marketplace, then press Enter to choose the user scope, so the mod is installed for every project.
 
-From a shell:
+From a shell (it asks nothing and installs at the user scope):
 
 ```bash
 claude plugin install swarm-autopsy --marketplace agryu-in/swarm-autopsy-claude-mod
 ```
 
+`claude plugin list` then shows `swarm-autopsy@swarm-autopsy`. Start a new `claude` session, and run `/swarm-autopsy`.
+
 **In the Claude desktop app**, where `/plugin` does not run:
 1. Click **+** next to the prompt box, then **Plugins**.
 2. Choose **Add marketplace** and enter `agryu-in/swarm-autopsy-claude-mod`.
-3. Choose **Add plugin**.
+3. Choose **Add plugin**, then **swarm-autopsy**.
 
 A mod installed from a terminal at the user scope loads in the desktop app's local sessions too. In a chat that was
 already open, run `/reload-plugins`.
 
 **Requirements:**
-- Claude Code with mods (function hooks): 2.1.287 or later. Tested with Claude Code 2.1.301 (CLI) and 2.1.299 (the
+- Claude Code with mods (function hooks): 2.1.287 or later. Tested with Claude Code 2.1.303 (CLI) and 2.1.299 (the
   desktop app's engine). The mod API is early access and may change between releases.
 - For the music: macOS, or Linux with PulseAudio or PipeWire (`paplay` and `pactl`). Without either, the pane simply
   says there is no audio player.
@@ -507,7 +509,9 @@ coverage gaps.
 | **▶ Play / ⏸ Pause** and **Volume** ▁▃▅▇█ | The scene's lofi track |
 | **Transparency** ◆◆◆◇◇ | How clear the liquid glass is, from frosted to crystal |
 
-Your choices are kept for every chat. One chat plays the music at a time. When that chat closes, another takes over.
+Your choices are kept for every chat. The music plays only in a chat whose pane is open, one chat at a time. When that
+chat closes, or its pane does, another chat with the pane open takes over. A chat that never opened the pane (a
+`claude -p` script, say) stays silent.
 
 **The background** stays perfectly still while the content scrolls over it. It is drawn for the pane's own shape: a tall
 side dock, a normal pane, or a wide one. A view too long for one drawing comes in **parts**, each scrolling smoothly over
@@ -853,8 +857,8 @@ sequenceDiagram
 **Music:**
 - **Players.** `paplay` where PulseAudio works, under its own client name, so `pactl` volume changes touch only its
   stream. Otherwise, on macOS, Claude Code's audio player.
-- **One chat plays at a time.** The owner renews a heartbeat in the mod's store every 3 s. Another chat takes over 10 s
-  after it stops.
+- **One chat plays at a time,** and only one whose pane is open. The owner renews a heartbeat in the mod's store every
+  3 s. Another chat with its pane open takes over 10 s after it stops, or at once when the owner closes its pane.
 
 </details>
 
@@ -891,15 +895,23 @@ claude plugin validate ./swarm-autopsy
 ```
 
 ```bash
+claude plugin validate .
+```
+
+```bash
 claude plugin test ./swarm-autopsy
 ```
 
-To type-check: load the mod once (for example with `claude --plugin-dir ./swarm-autopsy`), which writes its types into
-`swarm-autopsy/.claude-plugin/types/`, then run `npx tsc -p swarm-autopsy`.
+The first checks the mod's manifest and hooks module the way the engine reads them, and the second the marketplace.
+
+To type-check with `tsc` you also need Claude Code's declarations for the mod API (the `claude-code` and
+`claude-code/testing` modules), which this repo does not ship. `swarm-autopsy/tsconfig.json` extends
+`swarm-autopsy/.claude-plugin/types/tsconfig.json` (gitignored). With them there, run
+`npx -p typescript tsc -p swarm-autopsy` (plain `npx tsc` fetches an unrelated package).
 
 ### The tests
 
-559 tests in 24 files, run in Claude Code's own test host:
+564 tests in 24 files, run in Claude Code's own test host:
 
 | Files | Cover |
 | --- | --- |
@@ -914,7 +926,7 @@ To type-check: load the mod once (for example with `claude --plugin-dir ./swarm-
 
 ```text
 swarm-autopsy/
-├── .claude-plugin/plugin.json   the manifest (1.0.0)
+├── .claude-plugin/plugin.json   the manifest (1.0.1)
 ├── hooks/hooks.json             names the one module
 ├── hooks/register.tsx           the hooks, the command, the render hook, the stored settings
 ├── hooks/music.ts               the music player

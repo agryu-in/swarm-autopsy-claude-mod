@@ -251,8 +251,8 @@ describe('collector', () => {
         const ui = withClients(await $.ui.mount({ ...PANE(width), surface }))
         await ui.press({ key: 'tab-trail' })
         expect(await ui.find({ text: /Outcome so far/ })).toBeDefined()
-        // The Trail's own picture (map or overview), told apart from the decorative backdrop by its alt. Sunset Glass draws
-        // it on desktop from the medium layout up; compact draws no miniature chart (DESIGN-CONTRACT §10, V-9).
+        // The Trail's own picture (map or overview), told apart from the decorative backdrop by its alt. It is drawn
+        // on desktop from the medium layout up; compact draws no miniature chart.
         const map = /"alt":"Contribution trail/.test(JSON.stringify(await ui.drawn()))
         expect(map).toBe(surface === 'desktop' && width >= 56)
         await ui.press({ key: 'node-1-1' })
@@ -316,7 +316,7 @@ describe('collector', () => {
   })
 })
 
-// vNext integration: F2 ledger, F1 context and F3 spend vs outcome through the real hooks. SIMULATED.
+// Token features integration: the ledger, the context gauge and spend vs outcome through the real hooks. SIMULATED.
 describe('usage, context and spend integration', () => {
   async function usageSession($: Engine): Promise<void> {
     await runTwoAgents($)
@@ -464,7 +464,7 @@ describe('browsing a live pane (desktop press handles)', () => {
   // drawing keeps its handles, so while the person browses the pane draws a frozen copy of the data and the clock.
   const readEvent = (n: number) => ({ tool: 'Read', file_path: `/repo/src/extra-${n}.ts`, agentId: 'ag1' }) as never
   // The drawing without its press handles: the test host mints new ones on every render, while the real engine reuses
-  // its cached answer for an identical drawing (Report 01 §6, verified over stream-json). The drawing is what must hold.
+  // its cached answer for an identical drawing (verified over stream-json). The drawing is what must hold.
   const drawing = async (ui: { drawn: () => Promise<unknown> }) => JSON.stringify(await ui.drawn(), (key, value) => (key === 'press' ? undefined : value))
 
   test('after a press, new observations leave the drawing unchanged until the person stops browsing', LOAD, async ($, on) => {

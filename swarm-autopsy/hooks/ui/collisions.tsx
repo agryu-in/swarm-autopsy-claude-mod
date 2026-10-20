@@ -1,10 +1,10 @@
-// View C, Collaboration Collisions (DESIGN-CONTRACT §8.4; Sunset Glass §11): a
-// file × agent matrix of who read and who wrote what, in a glass panel, and the
-// signals worth a look, each a card with its severity glyph and word, evidence
-// label, agents, why, and its evidence and actions inside the card. A shared read
-// is never a conflict, and the same relative path in two worktrees is never one
-// file (lib/collisions decides both; this view only draws). A file several agents
-// wrote is a potential conflict: amber, never red. Workstream 3 owns this file.
+// View C, Collaboration Collisions: a file × agent matrix of who read and who
+// wrote what, in a glass panel, and the signals worth a look, each a card with
+// its severity glyph and word, evidence label, agents, why, and its evidence
+// and actions inside the card. A shared read is never a conflict, and the same
+// relative path in two worktrees is never one file (lib/collisions decides
+// both; this view only draws). A file several agents wrote is a potential
+// conflict: amber, never red.
 
 import type { RenderChildren } from 'claude-code'
 

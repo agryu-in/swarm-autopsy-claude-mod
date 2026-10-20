@@ -1,7 +1,7 @@
-// Workstream C · Contribution Trail view tests (DESIGN-CONTRACT §8.3). SIMULATED
-// snapshots in, the drawn tree out, read as logical lines (tests/view-helpers).
-// Pure views through a stub element table, plus one mounted walk through the
-// engine's own test host for the compact one-lane-open behaviour.
+// Contribution Trail view tests. SIMULATED snapshots in, the drawn tree out,
+// read as logical lines (tests/view-helpers). Pure views through a stub element
+// table, plus one mounted walk through the engine's own test host for the
+// compact one-lane-open behaviour.
 
 import type { On } from 'claude-code'
 import { describe, expect, mock, test } from 'claude-code/testing'
@@ -172,7 +172,7 @@ function healthOf(snapshot: Snapshot): HealthSignal[] {
   return gatherSignals({ snapshot, trail, collisions: analyzeCollisions(snapshot), ledger, spend })
 }
 
-/** The Svg sizing rule (Sunset Glass §2, R1 §6.1): an interactive Svg carries both sizes, each a number in (0, 4096]. */
+/** The Svg sizing rule: an interactive Svg carries both sizes, each a number in (0, 4096]. */
 const sized = (n: unknown): boolean => typeof n === 'number' && n > 0 && n <= 4096
 
 /** The text of a lane's header button (the line of it in the logical lines may carry more). */
@@ -202,7 +202,7 @@ const keyOf = (trail: Trail, node: TrailNode): string => {
 
 const labelOf = (snapshot: Snapshot, id: string) => snapshot.agents[id]?.label ?? '?'
 const METRIC = /\d[\d.,]*\s?[kM]?\s?(tok|tokens|req|requests)\b|\d[\d.]*%/
-/** Measure labels only (DESIGN-CONTRACT §4.1): evidence glyphs do not label a number. */
+/** Measure labels only: evidence glyphs do not label a number. */
 const LABEL = /[●≈∅]/
 const FORBIDDEN = /\b(wasted?|useless|lost|ignored|unused|inefficien\w*|more than expected|top contributors?)\b/i
 
@@ -221,7 +221,7 @@ describe('trail: model helpers', () => {
     expect(a).not.toBe(b)
   })
 
-  test('filter membership and counts come from trail flags, verdicts and F3 contributions', () => {
+  test('filter membership and counts come from trail flags, verdicts and outcome contributions', () => {
     const { trail, spend } = analysesOf(trailSession())
     expect(filterCounts(trail, spend)).toEqual({ all: 6, verified: 1, unresolved: 4, inconclusive: 1, failed: 1 })
   })
@@ -240,7 +240,7 @@ describe('trail: model helpers', () => {
     expect(pathOf(trail, undefined).edges.size).toBe(0)
   })
 
-  test('a lane badge is the F3 bucket, and verified is never stronger than INFERRED', () => {
+  test('a lane badge is the outcome bucket, and verified is never stronger than INFERRED', () => {
     const { spend } = analysesOf(trailSession())
     expect(badgeFor(spend, 'tidier')).toMatchObject({ bucket: 'verified', label: 'verified', evidence: 'INFERRED' })
     expect(badgeFor(spend, 'auditor')).toMatchObject({ bucket: 'report-only', label: 'report only', evidence: 'UNRESOLVED' })
@@ -250,7 +250,7 @@ describe('trail: model helpers', () => {
 })
 
 describe('trail: lanes, nodes and edges', () => {
-  test('each lane header carries the agent chip and its F3 bucket badge with the evidence label', () => {
+  test('each lane header carries the agent chip and its outcome bucket badge with the evidence label', () => {
     const snapshot = trailSession()
     for (const width of [49, 116]) {
       const drawn = render(snapshot, { width })
@@ -415,7 +415,7 @@ describe('trail: filters', () => {
 })
 
 describe('trail: outcome box', () => {
-  test('the spend-vs-outcome line is a stacked bar of F3 buckets, every number tagged, the basis reachable', () => {
+  test('the spend-vs-outcome line is a stacked bar of buckets, every number tagged, the basis reachable', () => {
     const snapshot = trailSession()
     const { spend } = analysesOf(snapshot)
     const closed = render(snapshot, { width: 116 })
@@ -426,7 +426,7 @@ describe('trail: outcome box', () => {
     expect(bars.length).toBeGreaterThan(1)
     expect(bars.every(b => Object.values(BUCKET_ROLE).includes(String(b.props.color)))).toBe(true)
     for (const bucket of spend.buckets) {
-      // "verified" carries its ◇ (F3-4); the other buckets name themselves.
+      // "verified" carries its ◇; the other buckets name themselves.
       const label = bucket.bucket === 'verified' ? '◇ verified' : bucketLabel(bucket.bucket)
       const line = closed.lines.find(l => l.includes(`■ ${label}`))
       expect(line).toBeDefined()
@@ -485,7 +485,7 @@ describe('trail: desktop map', () => {
     const svg = elements(wide.tree).find(e => e.type === 'Svg')
     expect(svg).toBeDefined()
     // Image mode with no size props fills its slot at the drawing's own ratio; an interactive frame without both sizes
-    // is the 300 × 150 thumbnail the person saw (R1 §6.1, §6.3d).
+    // is the 300 × 150 thumbnail the person saw.
     expect(svg?.props.isInteractive).toBeUndefined()
     const viewBox = /viewBox="0 0 ([\d.]+) ([\d.]+)"/.exec(String(svg?.props.source))
     expect(svg?.props.width).toBe(Math.round(Number(viewBox?.[1])))
@@ -574,7 +574,7 @@ describe('trail: desktop map', () => {
     expect(source).toContain('LINKED')
     expect(source).toContain('INFERRED')
     expect(source).toMatch(/stroke-dasharray/)
-    // Image mode shows no tooltip, so none is carried (Sunset Glass SG-9: the native list is the detail).
+    // Image mode shows no tooltip, so none is carried (the native list is the detail).
     expect(source).not.toContain('<title>')
     const fixer = identityHex(snapshot.agents.fixer) ?? 'missing'
     expect(source).toMatch(new RegExp(`<rect class="lane"[^>]*fill="${fixer}"`))
@@ -671,7 +671,7 @@ describe('trail: desktop map', () => {
     const medium = elements(render(snapshot, { width: 80, surface: 'desktop' }).tree).find(e => e.type === 'Svg')
     expect(medium).toBeDefined()
     expect(String(medium?.props.source)).not.toContain('class="edge')
-    // Compact (Sunset Glass V-9): no miniature chart; the native lanes and their beads carry the flow.
+    // Compact: no miniature chart; the native lanes and their beads carry the flow.
     for (const width of [40, 49]) {
       const compact = render(snapshot, { width, surface: 'desktop' })
       expect(elements(compact.tree).some(e => e.type === 'Svg')).toBe(false)
@@ -682,13 +682,13 @@ describe('trail: desktop map', () => {
   })
 })
 
-/** A desktop Button the desktop app can draw as it is: a plain label, no styled runs inside (R1 §4.1). */
+/** A desktop Button the desktop app can draw as it is: a plain label, no styled runs inside. */
 function isPlainButton(button: Element): boolean {
   const styled = elements(childrenOf(button)).some(e => e.type === 'Text' && ['color', 'backgroundColor', 'weight', 'dimColor', 'bold'].some(k => e.props[k] !== undefined))
   return typeof button.props.label === 'string' && !styled
 }
 
-describe('trail: Sunset Glass lanes and outcome box', () => {
+describe('trail: lanes and outcome box', () => {
   test('desktop lane headers draw the identity chip beside a plain Button that keeps the lane- key and its action', () => {
     const snapshot = trailSession()
     for (const width of [80, 116, 160]) {
@@ -770,7 +770,7 @@ describe('trail: Sunset Glass lanes and outcome box', () => {
     }
   })
 
-  test('the outcome box is a glass summary: count pills, the shared unresolved count “in Health”, the shared F3 bar and aligned bucket rows', () => {
+  test('the outcome box is a glass summary: count pills, the shared unresolved count “in Health”, the shared outcome bar and aligned bucket rows', () => {
     const snapshot = trailSession()
     const health = healthOf(snapshot)
     const n = unresolvedOf(health).length
@@ -785,7 +785,7 @@ describe('trail: Sunset Glass lanes and outcome box', () => {
     expect(pills.some(p => p.includes(`${subs.length} subagents`))).toBe(true)
     expect(pills.some(p => /\d+ files? changed/.test(p))).toBe(true)
     expect(pills.some(p => p.includes(`? ${n} unresolved`) && p.includes('in Health'))).toBe(true)
-    // The F3 bar is the shared BucketBar: Box segments in the bucket colours on desktop, never a run of █ text.
+    // The outcome bar is the shared BucketBar: Box segments in the bucket colours on desktop, never a run of █ text.
     expect(box.some(e => e.type === 'Text' && textStrings(childrenOf(e)).some(s => s.includes('█')))).toBe(false)
     const segments = box.filter(e => e.type === 'Box' && typeof e.props.flexGrow === 'number' && e.props.backgroundColor !== undefined)
     expect(segments.length).toBeGreaterThan(1)

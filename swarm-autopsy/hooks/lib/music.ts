@@ -1,7 +1,7 @@
-// Who plays the music (ported from the meadow mod). Play/pause and volume live in the shared store so every chat agrees;
-// only the chat named as owner plays. The owner keeps a heartbeat; when it stops (the chat
-// closed or went quiet) another chat claims the music and, once its claim stands on the next
-// tick, starts playing. Pure: the caller does what the decision says.
+// Who plays the music. Play/pause and volume live in the shared store so every chat agrees; only the chat named as
+// owner plays, and only a chat whose pane is open takes part. The owner keeps a heartbeat; when it stops (the chat
+// closed, its pane closed or it went quiet) another chat with its pane open claims the music and, once its claim
+// stands on the next tick, starts playing. Pure: the caller does what the decision says.
 
 import type { PlayerValue, SoundValue } from '../../types'
 
@@ -39,6 +39,8 @@ export type MusicFacts = {
   hasTrack: boolean
   /** This machine can play audio at all. */
   canPlay: boolean
+  /** This chat's pane is open: a chat without it (a `-p` run, a chat that never opened it) never plays. */
+  isListening: boolean
 }
 
 export type MusicDecision = {
@@ -52,7 +54,7 @@ export type MusicDecision = {
 export function decide(f: MusicFacts): MusicDecision {
   const isMine = f.owner?.session === f.me
   const isFresh = f.owner !== undefined && f.now - f.owner.beatAt < STALE_MS
-  if (!f.sound.isPlaying) return { playHere: false, owner: isMine ? 'release' : 'none', where: 'paused' }
+  if (!f.sound.isPlaying || !f.isListening) return { playHere: false, owner: isMine ? 'release' : 'none', where: 'paused' }
   if (!f.canPlay) return { playHere: false, owner: isMine ? 'release' : 'none', where: isFresh && !isMine ? 'elsewhere' : 'unavailable' }
   if (isMine) return { playHere: f.hasTrack, owner: 'beat', where: f.hasTrack ? 'here' : 'silent' }
   if (isFresh) return { playHere: false, owner: 'none', where: f.hasTrack ? 'elsewhere' : 'silent' }

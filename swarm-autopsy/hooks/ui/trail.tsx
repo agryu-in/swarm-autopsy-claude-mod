@@ -1,7 +1,7 @@
-// View: Contribution Trail (DESIGN-CONTRACT §8.3). Per agent, the flow from
-// delegation through findings, changes and verification to its F3 outcome,
-// the evidence-coded edges between nodes, and what stays unresolved.
-// - Outcome box first (verifications, flags, F3 spend vs outcome);
+// View: Contribution Trail. Per agent, the flow from delegation through
+// findings, changes and verification to its outcome, the evidence-coded edges
+// between nodes, and what stays unresolved.
+// - Outcome box first (verifications, flags, spend vs outcome);
 // - filter chips and the edge legend;
 // - desktop: the map (wide) or the stage overview (narrower, or a map too large),
 //   each beside its native twin; terminal wide: a text overview, stages as columns;
@@ -45,7 +45,7 @@ type Placed = { lane: TrailLane; index: number }
 /** The empty states' mark: an open circle, nothing drawn yet (it carries no evidence meaning). */
 const EMPTY_GLYPH = '○'
 
-/** The filter chips: each the number of lanes it shows (membership: trail-model). "verified" carries its ◇ (F3-4). */
+/** The filter chips: each the number of lanes it shows (membership: trail-model). "verified" carries its ◇. */
 function Filters(ctx: ViewContext, trail: Trail, spend: SpendOutcome, active: TrailFilter) {
   const { Box, Text } = ctx.els
   const counts = filterCounts(trail, spend)
@@ -80,12 +80,12 @@ function EdgeLegend(ctx: ViewContext, selected: boolean) {
 
 /**
  * Desktop: the edge map on wide panes, the stage overview on narrower ones and whenever the map would not fit the
- * source budget, on a glass panel. Image mode sized by its viewBox (a Client requires a size) in the panel's column Box: the
- * drawing (a viewBox about the pane's pixel width) fills the panel at its own ratio, its type near 1:1 (R1 §6.3d, SG-9). Never pressable and
- * without tooltips: the list is the twin.
+ * source budget, on a glass panel. Image mode sized by its viewBox (a Client requires a size) in the panel's column
+ * Box: the drawing (a viewBox about the pane's pixel width) fills the panel at its own ratio, its type near 1:1. Never
+ * pressable and without tooltips: the list is the twin.
  */
 function Picture(ctx: ViewContext, trail: Trail, input: MapInput) {
-  // Compact draws no chart (Sunset Glass V-9): at that width it would be a miniature, and the beads already show the flow.
+  // Compact draws no chart: at that width it would be a miniature, and the beads already show the flow.
   if (ctx.layout === 'compact' || !drawsSvg(ctx) || !('Svg' in ctx.els)) return null
   const { Box, Svg } = ctx.els
   const map = ctx.layout === 'wide' ? trailSvg(ctx.snapshot, trail, input) : undefined

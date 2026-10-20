@@ -1,6 +1,6 @@
 // Live's facts about one agent, read from the snapshot and the analyses: its
-// files (D3: a search root is a path, not a file read), its last activity in
-// plain words, whether its usage is known (O5), and its F3 bucket. Pure: no
+// files (a search root is a path, not a file read), its last activity in
+// plain words, whether its usage is known, and its outcome bucket. Pure: no
 // drawing, no `$`, no new metric (counts and lookups over captured data only).
 
 import type { AgentOutcome, AgentRecord, Evidence, ForensicEvent, LedgerRow, LedgerTotals, LiveFilter, Snapshot, SpendBucket, SpendOutcome } from '../../types'
@@ -96,7 +96,7 @@ export function activityOf(snapshot: Snapshot, agent: AgentRecord): Activity {
 export type Usage = { known: false; reason: string } | { known: true; totals: LedgerTotals }
 
 /**
- * The agent's direct usage, or why it is unknown (O5): no request heard at all, or every request came back without
+ * The agent's direct usage, or why it is unknown: no request heard at all, or every request came back without
  * usage. Unknown is never drawn as an observed 0.
  */
 export function usageOf(row: LedgerRow | undefined): Usage {
@@ -116,16 +116,16 @@ export function liveMatches(agent: AgentRecord, filter: LiveFilter): boolean {
   return filter === 'all' || agent.state === filter
 }
 
-// ── F3 ──
+// ── spend vs outcome ──
 
-/** F3's bucket words: the one table every view uses (`BUCKET_WORDS`, Sunset Glass §4.3). */
+/** The outcome bucket words: the one table every view uses (`BUCKET_WORDS`). */
 export const BUCKET_LABEL: Record<SpendBucket['bucket'], string> = BUCKET_WORDS
 
 export function outcomeOf(spend: SpendOutcome, agentId: string): AgentOutcome | undefined {
   return spend.agents.find(a => a.agentId === agentId)
 }
 
-/** The spend bucket the agent's tokens are counted in (exactly one, F3-1). */
+/** The spend bucket the agent's tokens are counted in (exactly one). */
 export function bucketOf(spend: SpendOutcome, agentId: string): SpendBucket | undefined {
   return spend.buckets.find(b => b.agents.includes(agentId))
 }

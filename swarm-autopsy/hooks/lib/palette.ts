@@ -1,8 +1,8 @@
-// Sunset Glass colour roles and tokens (docs/sunset-glass/DESIGN-CONTRACT.md §4)
-// as code. Pure. Text keeps theme keys, which follow the person's light, dark and
-// daltonized themes. Hex is used for chrome accents, data hues, identity and
-// glass: every 6-digit hex here is a mid-tone legible on both the dark and the
-// light dock, and translucent (8-digit) hex is for the desktop only (`GLASS`).
+// Colour roles and tokens as code. Pure. Text keeps theme keys, which follow
+// the person's light, dark and daltonized themes. Hex is used for chrome
+// accents, data hues, identity and glass: every 6-digit hex here is a mid-tone
+// legible on both the dark and the light dock, and translucent (8-digit) hex is
+// for the desktop only (`GLASS`).
 
 import type { AgentRecord, AgentState, SpendBucket, TokenCounts } from '../../types'
 import { activeTheme } from './themes'
@@ -11,7 +11,7 @@ import { activeTheme } from './themes'
 const data = () => activeTheme().data
 
 /**
- * Colour roles by meaning (§4.1): one meaning each. Every role follows the active theme: on the desktop each scene gives
+ * Colour roles by meaning: one meaning each. Every role follows the active theme: on the desktop each scene gives
  * each meaning its own tuned colour (themes.ts `dataOfScene`: green still means verified, red a failure); classic, and
  * so the terminal, keeps the surface's theme keys exactly as before.
  */
@@ -78,7 +78,7 @@ export const ROLE = {
   },
 }
 
-/** Agent identity hues in classic (§3.1): mid-tones away from the status hues, ordered so neighbours differ. */
+/** Agent identity hues in classic: mid-tones away from the status hues, ordered so neighbours differ. */
 export const IDENTITY_HEX: readonly string[] = ['#0891b2', '#8b5cf6', '#db2777', '#2563eb', '#c026d3', '#0284c7', '#7c3aed', '#4f46e5']
 
 /** The identity hues the active theme draws with. */
@@ -124,7 +124,7 @@ const category = (key: TokenCategory, short: string, name: string) => ({
 })
 
 /**
- * The four token categories in drawing order (§4.2), each with its short and long name and its hex in the active theme.
+ * The four token categories in drawing order, each with its short and long name and its hex in the active theme.
  * The colour is hex on every surface, so the categories stay apart on desktop, where several theme keys share one.
  */
 export const TOKEN_CATEGORIES: ReadonlyArray<{ readonly key: TokenCategory; readonly short: string; readonly name: string; readonly role: string; readonly hex: string }> = [
@@ -134,7 +134,7 @@ export const TOKEN_CATEGORIES: ReadonlyArray<{ readonly key: TokenCategory; read
   category('output', 'out', 'output'),
 ]
 
-/** F3 bucket colours by role, in the active theme. */
+/** Outcome bucket colours by role, in the active theme. */
 export const BUCKET_ROLE: Readonly<Record<SpendBucket['bucket'], string>> = {
   get coordinator() {
     return ROLE.main
@@ -182,7 +182,7 @@ export const STATE_ROLE: Readonly<Record<AgentState, string>> = {
 }
 
 /**
- * Glass for the desktop (§4.5): the active theme's translucent fills, edges, hover lift and bar track, and the pane's
+ * Glass for the desktop: the active theme's translucent fills, edges, hover lift and bar track, and the pane's
  * own tint. Never on the terminal, which paints alpha hex as opaque slabs; `glass()` in the kit is the main reader.
  */
 export const GLASS = {

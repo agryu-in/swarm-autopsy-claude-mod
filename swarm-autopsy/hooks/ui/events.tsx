@@ -1,8 +1,7 @@
 // One timeline row, shared by Forensics and Live (recent activity, the
 // inspector's last events): the event's number and time, the agent's identity
-// chip, the event-kind glyph (DESIGN-CONTRACT §3.2), the summary and the status
-// in its verdict role. Workstream D owns this file; its exported signatures are
-// fixed for Live.
+// chip, the event-kind glyph, the summary and the status in its verdict role.
+// Live relies on its exported signatures.
 
 import type { ForensicEvent } from '../../types'
 import { VERDICT_COLOR, VERDICT_GLYPH, offset, truncate } from '../lib/format'
@@ -31,7 +30,7 @@ const KIND_GLYPH: Record<ForensicEvent['kind'], string> = {
 const ACCESS_GLYPH: Record<string, string> = { read: '◦', write: '✎', search: '⌕', exec: '$', other: '·' }
 
 /**
- * The event's kind as one glyph (§3.2): ◦ read · ✎ write · ⌕ search · $ exec · ⇢ spawn · ⊘ denied · ▷ turn start ·
+ * The event's kind as one glyph: ◦ read · ✎ write · ⌕ search · $ exec · ⇢ spawn · ⊘ denied · ▷ turn start ·
  * ◁ turn end · ⇊ compaction. A check shows its verdict instead (✓ ✕ ~, … while it runs); `⚑` is left to the Trail.
  */
 export function eventGlyph(event: ForensicEvent): string {
@@ -89,7 +88,7 @@ function chipCells(ctx: ViewContext, agentId: string): number {
 /** Event kinds that frame the work rather than do it: drawn quieter so the calls, checks and delegations stand out. */
 const FRAMING: ReadonlySet<ForensicEvent['kind']> = new Set(['turn-start', 'turn-end', 'agent-start', 'agent-stop', 'session'])
 
-/** Desktop cell widths of a timeline row (Sunset Glass §8): the number and time, and the status column. */
+/** Desktop cell widths of a timeline row: the number and time, and the status column. */
 const HEAD_COLS = 13
 const NARROW_HEAD_COLS = 6
 const STATUS_COLS = 18
@@ -97,7 +96,7 @@ const NARROW_STATUS_COLS = 2
 
 /**
  * The desktop row: fixed-width Box cells, so the status column lines up on every row whatever the proportional font
- * does with the text before it (R1 §5.3). The summary takes the room left and ends in an ellipsis.
+ * does with the text before it. The summary takes the room left and ends in an ellipsis.
  */
 function EventCells(ctx: ViewContext, event: ForensicEvent, narrow: boolean, withAgent: boolean) {
   const { Box, Text } = ctx.els

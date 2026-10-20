@@ -1,9 +1,9 @@
-// Collisions and Health (Sunset Glass Workstream 3; DESIGN-CONTRACT §8.4,
-// §8.7): the Collisions matrix and signal cards, and the Health list. Split from
-// ui-collisions-forensics.test.tsx with no assertion changed. The whole pane is
-// mounted through the engine's test host with a SIMULATED snapshot seeded through
-// `state.get` (as the acceptance suite does), and read as logical lines; a few
-// wiring checks call a view directly with plain-data stand-ins for the elements.
+// Collisions and Health: the Collisions matrix and signal cards, and the Health
+// list. Split from ui-collisions-forensics.test.tsx with no assertion changed.
+// The whole pane is mounted through the engine's test host with a SIMULATED
+// snapshot seeded through `state.get` (as the acceptance suite does), and read
+// as logical lines; a few wiring checks call a view directly with plain-data
+// stand-ins for the elements.
 
 import type { On } from 'claude-code'
 import { describe, expect, mock, test, type Engine } from 'claude-code/testing'
@@ -314,7 +314,7 @@ describe('health view', () => {
   })
 })
 
-// ── Sunset Glass (Workstream 3): reading the drawn tree ──
+// ── reading the drawn tree ──
 
 type El = Exclude<DrawnNode, string | number | boolean | null | undefined>
 
@@ -372,7 +372,8 @@ function healthFor(snapshot: Snapshot): HealthSignal[] {
 
 /**
  * SIMULATED: three agents still active with nothing captured (three identical "unresolved: No captured outcome"
- * findings at ?), and two that ended without a report (two identical trail flags and two identical F3 findings at ∅).
+ * findings at ?), and two that ended without a report (two identical trail flags and two identical outcome findings at
+ * ∅).
  */
 function quietSwarm(): Snapshot {
   const snapshot = build(
@@ -387,9 +388,9 @@ function surfaceContext(snapshot: Snapshot, width: number, surface: 'terminal' |
   return { ...stubContext(snapshot, width), surface }
 }
 
-// ── Sunset Glass: Collisions ──
+// ── Collisions on glass ──
 
-describe('collisions: Sunset Glass', () => {
+describe('collisions: glass', () => {
   test('the matrix sits in a glass panel at medium and wide (translucent on desktop, a round border on the terminal), plain at compact', SLOW, async ($, on) => {
     seededEngine(on, collidingSession())
     for (const [surface, width] of [['desktop', 116], ['terminal', 116], ['terminal', 80], ['desktop', 160]] as const) {
@@ -497,10 +498,10 @@ describe('collisions: Sunset Glass', () => {
   })
 })
 
-// ── Sunset Glass: Health ──
+// ── Health on glass ──
 
-describe('health: Sunset Glass', () => {
-  test('every card draws its level word beside its glyph, so an F3 entry titled "unresolved:" at ∅ reads as unavailable', SLOW, async ($, on) => {
+describe('health: glass', () => {
+  test('every card draws its level word beside its glyph, so an outcome entry titled "unresolved:" at ∅ reads as unavailable', SLOW, async ($, on) => {
     seededEngine(on, quietSwarm())
     for (const [surface, width] of [['terminal', 49], ['terminal', 116], ['desktop', 160]] as const) {
       const ui = await mountOn($, surface, width, 'health')
@@ -659,7 +660,7 @@ describe('health: Sunset Glass', () => {
   })
 })
 
-// ── Sunset Glass: the Live strip ──
+// ── the Live strip ──
 
 describe('the Live health strip', () => {
   test('identical titles fold into one line with every agent chip, then all N in Health', SLOW, async ($, on) => {
@@ -718,7 +719,7 @@ describe('the Live health strip', () => {
   })
 })
 
-// ── Sunset Glass: platform ──
+// ── platform ──
 
 /** Every tab of mine on both surfaces and four widths: unique keys, Buttons hold only Text, no terminal alpha, the budget. */
 async function platformScan($: Engine, opened: boolean) {

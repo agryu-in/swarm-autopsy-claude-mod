@@ -1,7 +1,6 @@
 // Shared pieces of the pane: the view context and actions, the header (title,
 // live dot, status pills, tabs with badges, the KPI glass tiles), the evidence
-// legend and the footer. Lead-owned (visual-redesign DESIGN-CONTRACT §6, §8.1;
-// Sunset Glass DESIGN-CONTRACT §11 "Header and footer").
+// legend and the footer.
 
 import type { ElementTable, RenderSurface } from 'claude-code'
 
@@ -78,7 +77,7 @@ export type ViewContext = {
   rows: number
   /** Rows the pane is scrolled down by (the desktop reports it on every scroll step); the backdrop frame sits there. */
   scrollOffset?: number
-  /** The layout class for this width (DESIGN-CONTRACT §5). */
+  /** The layout class for this width. */
   layout: Layout
   /**
    * Whether the pane draws held data: `paused` (the person paused it) or `browsing` (a press in the last seconds). A
@@ -136,7 +135,7 @@ function Tabs(ctx: ViewContext, analyses: Analyses) {
     <Box flexDirection="row" flexWrap="wrap" columnGap={1}>
       {VIEWS.map(view => {
         const badge = badgeFor(view.id, analyses)
-        // The count in parentheses (SG-12), so it never reads as a second number beside the desktop's hotkey keycap.
+        // The count in parentheses, so it never reads as a second number beside the desktop's hotkey keycap.
         const label = `${ctx.surface === 'terminal' ? `${view.hotkey} ` : ''}${view.label}${badge > 0 ? ` (${badge})` : ''}`
         return ChoiceButton(ctx, {
           key: `tab-${view.id}`,
@@ -150,7 +149,7 @@ function Tabs(ctx: ViewContext, analyses: Analyses) {
   )
 }
 
-/** The `? N unresolved` count every view draws (SG-U): the findings Health marks `?`, never a second tally. */
+/** The `? N unresolved` count every view draws: the findings Health marks `?`, never a second tally. */
 export function UnresolvedCount(ctx: ViewContext, health: Analyses['health']) {
   const { Text } = ctx.els
   const n = unresolvedOf(health).length
@@ -382,7 +381,7 @@ function KpiStrip(ctx: ViewContext, analyses: Analyses) {
   const { Box } = ctx.els
   if (ctx.layout === 'compact' && !paintsGlass(ctx)) return null
   const perRow = ctx.layout === 'wide' ? 4 : ctx.layout === 'medium' || ctx.width >= TWO_CARDS_FROM ? 2 : 1
-  // Expanded panes cap the tiles rather than stretch them (Sunset Glass §10).
+  // Expanded panes cap the tiles rather than stretch them.
   const fair = Math.floor((ctx.width - (perRow - 1)) / perRow)
   const tileWidth = Math.max(20, isExpanded(ctx) ? Math.min(fair, KPI_MAX_WIDTH) : fair)
   return (

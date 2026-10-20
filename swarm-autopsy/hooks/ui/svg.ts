@@ -1,6 +1,5 @@
-// Desktop-only vector painters for the visual redesign (DESIGN-CONTRACT §2,
-// §6). Pure: each returns Svg markup sized by its viewBox (no fixed width, so it
-// scales to its slot) and a one-line alt that carries every number it draws.
+// Desktop-only vector painters. Pure: each returns Svg markup sized by its
+// viewBox (no fixed width, so it scales to its slot) and a one-line alt that carries every number it draws.
 // A drawing never holds information its native twin (Text beside it) lacks.
 
 import type { Measure } from '../../types'

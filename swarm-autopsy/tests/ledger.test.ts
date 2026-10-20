@@ -1,4 +1,4 @@
-// F2 ledger tests: SIMULATED `turn.step` records and `turn.complete` reports
+// Token ledger tests: SIMULATED `turn.step` records and `turn.complete` reports
 // in, ledger state and view out. Nothing here touches a live session, and no
 // figure below is a real charge.
 
@@ -211,7 +211,7 @@ describe('applyUsage', () => {
     expect(ledger.turnOrder[0]).toBe('t1')
   })
 
-  test('the bounds are the ones contract §6a fixes', () => {
+  test('the bounds are the ones the ledger documents', () => {
     expect(SEEN_CAP).toBe(500)
     expect(HISTORY_CAP).toBe(40)
     expect(TURNS_CAP).toBe(400)
@@ -559,8 +559,8 @@ describe('pricing', () => {
     expect(PRICE_TABLE.assumptions[0]).toContain('cacheWriteTtl')
   })
 
-  // CAPTURED, not simulated: the per-agent token totals of live run 20261017T155333Z (export.json, matched against the
-  // session's own transcripts by live-test/verify-ledger.mjs). No request's prompt exceeded 100K, so no large tallies.
+  // CAPTURED, not simulated: the per-agent token totals of a recorded live run (its export, matched against the
+  // session's own transcripts). No request's prompt exceeded 100K, so no large tallies.
   test('the live run of 2026-10-17 prices to Claude Code’s own total for it', () => {
     const opus = (input: number, cacheRead: number, cacheWrite: number, output: number) => ({
       'claude-opus-5-5': { requests: 1, tokens: tokens(input, cacheRead, cacheWrite, output), largeRequests: 0, largeTokens: tokens(0) },
@@ -712,8 +712,8 @@ describe('pricing', () => {
     if ('error' in negative) expect(negative.error).toContain('models[0].inputPerMTok')
   })
 
-  test('the built-in table matches contract §5 cell by cell', () => {
-    // [model, input, output, cache read] as contract §5 lists them, in its order.
+  test('the built-in table matches the published list prices cell by cell', () => {
+    // [model, input, output, cache read] as the list prices give them, in the table's order.
     const contract: Array<[string, number, number, number]> = [
       ['claude-fable-5-1', 10, 50, 0.25],
       ['claude-mythos-5-1', 10, 50, 0.25],
@@ -807,7 +807,7 @@ describe('pricing', () => {
 })
 
 // ── drawing: a fake element table, so the panel is read as logical lines and buttons ──
-// (UI section, revised for the visual redesign: rows focus their agent pane-wide, details open under the row, the
+// (UI section: rows focus their agent pane-wide, details open under the row, the
 // price assumptions and the less urgent notes sit behind disclosures. Text is read as logical lines, so a line's
 // nested runs stay one string.)
 

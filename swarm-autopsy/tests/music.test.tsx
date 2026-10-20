@@ -1,4 +1,4 @@
-// The scenes' music: who plays it (ported from the meadow mod), every scene's track and its credit, and the toolbar's
+// The scenes' music: who plays it, every scene's track and its credit, and the toolbar's
 // music row through the engine's own test host: play, pause and the volume, shared through the store, the player run as
 // `paplay` with this mod's own stream name. The world beneath (store, processes) is answered from memory: no audio.
 
@@ -16,7 +16,7 @@ const NOW = 1_100_000
 const SLOW = { timeoutMs: 120_000 }
 
 describe('who plays the music', () => {
-  const base: MusicFacts = { me: 'a', now: 100_000, sound: { isPlaying: true, volume: 2 }, owner: undefined, hasTrack: true, canPlay: true }
+  const base: MusicFacts = { me: 'a', now: 100_000, sound: { isPlaying: true, volume: 2 }, owner: undefined, hasTrack: true, canPlay: true, isListening: true }
 
   test('paused: nobody plays, and the owner lets go', () => {
     expect(decide({ ...base, sound: { isPlaying: false, volume: 2 } })).toEqual({ playHere: false, owner: 'none', where: 'paused' })
@@ -39,6 +39,11 @@ describe('who plays the music', () => {
     expect([...steps].sort((x, y) => x - y)).toEqual(steps)
     expect(Math.max(...steps)).toBeLessThan(1)
     expect(cleanSound({ isPlaying: 'yes', volume: 9 })).toEqual({ isPlaying: false, volume: 2 })
+  })
+
+  test('a chat whose pane is not open never claims or plays the music, and lets go of it', () => {
+    expect(decide({ ...base, isListening: false })).toEqual({ playHere: false, owner: 'none', where: 'paused' })
+    expect(decide({ ...base, isListening: false, owner: { session: 'a', beatAt: base.now } })).toEqual({ playHere: false, owner: 'release', where: 'paused' })
   })
 
   test('every scene has its own track and the credit the toolbar shows', () => {
@@ -67,13 +72,18 @@ function all(node: unknown, out: El[] = []): El[] {
 const label = (root: unknown, key: string) => all(root).find(el => el.type === 'Button' && el.props?.key === key)?.props?.label
 const variant = (root: unknown, key: string) => all(root).find(el => el.type === 'Button' && el.props?.key === key)?.props?.variant
 
-type World = { store: Map<string, unknown>; spawned: string[][]; clock: ReturnType<typeof mock.clock> }
+type World = { store: Map<string, unknown>; spawned: string[][]; stopped: string[][]; clock: ReturnType<typeof mock.clock>; pane: { isOpen: boolean } }
 
 /** A desktop chat with a PulseAudio player that keeps playing until the mod stops it. */
 function world(on: On, seed: Snapshot, canPlay = true): World {
   const clock = mock.clock(on, { now: NOW })
   const store = new Map<string, unknown>()
   const spawned: string[][] = []
+  const stopped: string[][] = []
+  const pane = { isOpen: true }
+  on('ui.panes', () => ({
+    value: pane.isOpen ? [{ id: PLUGIN, title: 'Swarm Autopsy', isShown: true, isFocused: true, isPlaced: true }] : [],
+  }))
   on('store.get', (_$, e) => ({ value: store.get(e.key) }))
   on('store.set', (_$, e) => {
     store.set(e.key, JSON.parse(JSON.stringify(e.value)))
@@ -84,6 +94,7 @@ function world(on: On, seed: Snapshot, canPlay = true): World {
     return { value: undefined }
   })
   on('session.start', (_$, e) => ({ cwd: e.cwd }))
+  on('session.end', (_$, e) => ({ sessionId: e.sessionId }))
   on('session.id', () => ({ value: 'chat-a' }))
   on('session.cwd', () => ({ value: '/repo' }))
   on('session.turns', () => ({ value: 0 }))
@@ -101,9 +112,10 @@ function world(on: On, seed: Snapshot, canPlay = true): World {
   on('process.spawn', async function* (_$, e, next) {
     spawned.push([...e.argv])
     await new Promise<void>(resolve => next.signal.addEventListener('abort', () => resolve()))
+    stopped.push([...e.argv])
     return { value: { code: null, signal: 'SIGTERM' } }
   })
-  return { store, spawned, clock }
+  return { store, spawned, stopped, clock, pane }
 }
 
 const PANE = {
@@ -162,6 +174,41 @@ describe('the music row', () => {
     await w.clock.advance(1600)
     expect(w.spawned).toEqual([])
     expect(JSON.stringify(await ui.drawn())).toContain('no audio')
+    await ui.unmount()
+  })
+
+  // Found in the 1.0.0 review: music played in every later session (`claude -p` scripts too) once Play was left on.
+  test('a chat whose pane is not open stays silent, and one that closes its pane hands the music on', SLOW, async ($: Engine, on: On) => {
+    const w = world(on, { ...build(...threeAgentSession()), sessionId: 'music' })
+    w.store.set('sound', { isPlaying: true, volume: 2 })
+    w.pane.isOpen = false
+    await $.session.start({ cwd: '/repo', surface: 'cli', isInteractive: false } as never)
+    await w.clock.advance(4000)
+    expect(w.spawned).toEqual([])
+    expect(w.store.has('music-owner')).toBe(false)
+    w.pane.isOpen = true
+    await w.clock.advance(3200)
+    expect(w.spawned.at(-1)?.[0]).toBe('paplay')
+    w.pane.isOpen = false
+    await w.clock.advance(1600)
+    expect(w.stopped.length).toBe(w.spawned.length)
+    expect(w.store.has('music-owner')).toBe(false)
+  })
+
+  // Found in the 1.0.0 review: /clear ends the session without a new session.start, which used to leave the music
+  // without its tick for the rest of the process.
+  test('after /clear the music goes on under the new session', SLOW, async ($: Engine, on: On) => {
+    const w = world(on, { ...build(...threeAgentSession()), sessionId: 'music' })
+    const ui = await open($, w)
+    await ui.press({ key: 'sa-play' })
+    await w.clock.advance(1600)
+    const before = w.spawned.length
+    expect(before).toBeGreaterThan(0)
+    await $.session.end({ reason: 'clear', sessionId: 'chat-a', resume: { id: 'chat-a' } } as never)
+    expect(w.stopped.length).toBe(before)
+    await w.clock.advance(3200)
+    expect(w.spawned.length).toBeGreaterThan(before)
+    expect(w.store.get('sound')).toEqual({ isPlaying: true, volume: 2 })
     await ui.unmount()
   })
 })

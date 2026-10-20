@@ -1,7 +1,6 @@
-// Swarm Health's gathering function (DESIGN-CONTRACT §8.7, Report 03 §7): every
-// entry maps an existing export's own finding, with its own words and scale.
-// SIMULATED fixtures only; no score, no threshold, no new detection is tested
-// for, because none may exist.
+// Swarm Health's gathering function: every entry maps an existing export's own
+// finding, with its own words and scale. SIMULATED fixtures only; no score, no
+// threshold, no new detection is tested for, because none may exist.
 
 import { describe, expect, test } from 'claude-code/testing'
 
@@ -32,7 +31,10 @@ function withRecords(snapshot: Snapshot, records: readonly UsageRecord[]): Snaps
   return { ...snapshot, ledger: records.reduce((ledger, record) => applyUsage(ledger, record), snapshot.ledger) }
 }
 
-/** Two agents editing one file interleaved, a failing check, and every F1/F2/coverage source raised once. */
+/**
+ * Two agents editing one file interleaved, a failing check, and every context, ledger and coverage source raised
+ * once.
+ */
 function richSnapshot(): Snapshot {
   const base = build(
     spawn('a', { type: 'Explore', description: 'tune the cache' }),

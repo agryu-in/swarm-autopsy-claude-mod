@@ -178,7 +178,7 @@ export type Snapshot = {
   /** tool_use_ids started and not yet ended, so an end whose start was evicted is not counted twice. */
   openTools: string[]
   context?: ContextReading
-  /** F2's ledger: the one source of token usage (definitions 1–4). */
+  /** The token ledger: the one source of token usage. */
   ledger: LedgerState
   /** Compactions with their token counts, oldest first, bounded. */
   compactionMarks: CompactionMark[]
@@ -188,9 +188,7 @@ export type Snapshot = {
   notes: string[]
 }
 
-// ── vNext shared contract (F2 ledger, F1 context, F3 spend vs outcome) ──
-// Owned by the lead; docs/vnext-contract.md explains each definition. A
-// teammate who needs a change here asks the lead instead of editing it.
+// ── Shared types of the token features (the token ledger, the context gauge, spend vs outcome) ──
 
 /** How a displayed number is supported: read from an event, computed from a stated assumption, or not available. */
 export type Measure = 'OBSERVED' | 'ESTIMATED' | 'UNAVAILABLE'
@@ -343,7 +341,7 @@ export type LedgerRow = {
   reconciliation: { turnsCompared: number; mismatched: number; reportedOnly: number; note?: string }
 }
 
-/** F2's view model: rows in tree order, session totals, the price table and the ledger's own caveats. */
+/** The token ledger's view model: rows in tree order, session totals, the price table and the ledger's own caveats. */
 export type LedgerView = {
   rows: LedgerRow[]
   /** Sum of every agent's direct totals: each request counted once. */
@@ -374,7 +372,7 @@ export type AgentContextView = {
   gaps: string[]
 }
 
-/** F3: what a contribution or an agent's work amounted to, by the captured evidence. */
+/** Spend vs outcome: what a contribution or an agent's work amounted to, by the captured evidence. */
 export type OutcomeCategory = 'verified' | 'changed-unverified' | 'failed-or-inconclusive' | 'report-only' | 'unresolved'
 
 /** One contribution (one or more trail nodes) and why it was classified so. */
@@ -411,7 +409,7 @@ export type SpendBucket = {
   meaning: string
 }
 
-/** F3's view model. `denominator` is explained in `denominatorBasis`. */
+/** The spend vs outcome view model. `denominator` is explained in `denominatorBasis`. */
 export type SpendOutcome = {
   agents: AgentOutcome[]
   buckets: SpendBucket[]
@@ -424,7 +422,7 @@ export type View = 'live' | 'trail' | 'collisions' | 'forensics' | 'spend' | 'he
 
 export type TimelineFilter = 'all' | 'agents' | 'files' | 'tests' | 'failures' | 'signals'
 
-/** Trail lanes shown: all, or those whose outcome or flags match (visual redesign §7.4). */
+/** Trail lanes shown: all, or those whose outcome or flags match. */
 export type TrailFilter = 'all' | 'verified' | 'unresolved' | 'inconclusive' | 'failed'
 
 /** Live agents shown, by state. */
@@ -476,8 +474,8 @@ export type PlayerValue = {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Visual redesign: Swarm Health. A list of signals the existing analyses already
-// raised, mapped to one shape. No score, no threshold, no new detection.
+// Swarm Health. A list of signals the existing analyses already raised, mapped
+// to one shape. No score, no threshold, no new detection.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export type HealthSource = 'trail' | 'collisions' | 'context' | 'ledger' | 'outcome' | 'coverage'

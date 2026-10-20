@@ -1,7 +1,7 @@
 // Small display helpers shared by the views and the export. Pure.
 
 import type { AgentRecord, AgentState, Evidence, Measure, Snapshot, SpendBucket, VerificationVerdict } from '../../types'
-import { ROLE, STATE_ROLE } from './palette'
+import { ROLE } from './palette'
 
 /** Elapsed time since the collector's start, as +m:ss or +h:mm:ss. */
 export function offset(startedAt: number, at: number): string {
@@ -51,7 +51,7 @@ export function shortId(id: string): string {
   return id.length > 10 ? `${id.slice(0, 8)}…` : id
 }
 
-/** Agent state glyphs (DESIGN-CONTRACT §3.2): `●` is left to OBSERVED, so completed is `◉`. */
+/** Agent state glyphs: `●` is left to OBSERVED, so completed is `◉`. */
 export const STATE_GLYPH: Record<AgentState, string> = {
   active: '◐',
   completed: '◉',
@@ -59,8 +59,6 @@ export const STATE_GLYPH: Record<AgentState, string> = {
   stopped: '■',
   unknown: '◌',
 }
-
-export const STATE_COLOR: Record<AgentState, string> = STATE_ROLE
 
 export const EVIDENCE_GLYPH: Record<Evidence, string> = {
   OBSERVED: '●',
@@ -70,7 +68,7 @@ export const EVIDENCE_GLYPH: Record<Evidence, string> = {
   UNAVAILABLE: '∅',
 }
 
-/** Evidence colours (§3.1): LINKED is an analytical link, never the green of a passed check. */
+/** Evidence colours: LINKED is an analytical link, never the green of a passed check. */
 export const EVIDENCE_COLOR: Record<Evidence, string> = {
   get OBSERVED() {
     return ROLE.text
@@ -130,7 +128,7 @@ export const VERDICT_COLOR: Record<VerificationVerdict, string> = {
 }
 
 /**
- * A share as text, with one rounding rule everywhere (DESIGN-CONTRACT §6; Sunset Glass §12): rounded to one decimal
+ * A share as text, with one rounding rule everywhere: rounded to one decimal
  * first, then whole numbers as they are, one decimal below 10%, whole numbers above, so 9.96 reads `10%`, never `10.0%`.
  * `<0.1%` for a positive share too small to show, `n/a` for none.
  */
@@ -142,7 +140,7 @@ export function pct(value: number | undefined): string {
   return tenth < 10 ? `${tenth.toFixed(1)}%` : `${Math.round(value)}%`
 }
 
-/** One wording for each F3 bucket, used by every view (Sunset Glass §4.3). */
+/** One wording for each outcome bucket, used by every view. */
 export const BUCKET_WORDS: Record<SpendBucket['bucket'], string> = {
   coordinator: 'coordinator',
   verified: 'verified',

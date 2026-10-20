@@ -1,9 +1,9 @@
-// Live's details for the focused agent (Sunset Glass DESIGN-CONTRACT §11 "Agent
-// Details"): a summary tile (identity, state, the F3 bucket badge, the context
-// gauge, the tokens and their bar, files, the last activity), then one section
-// each, with one heading style and in this order: context, usage (Spend's ledger
-// detail), outcome (Spend's outcome detail), delegation and report, files, and
-// the last events. Ids and sources sit, muted and mono, behind "why?".
+// Live's details for the focused agent: a summary tile (identity, state, the
+// outcome bucket badge, the context gauge, the tokens and their bar, files, the
+// last activity), then one section each, with one heading style and in this
+// order: context, usage (Spend's ledger detail), outcome (Spend's outcome
+// detail), delegation and report, files, and the last events. Ids and sources
+// sit, muted and mono, behind "why?".
 // Placement is the caller's: in place (medium), the detail column (wide) or the
 // whole view (compact); the caller passes a context sized to that place.
 
@@ -36,7 +36,7 @@ export type InspectorOptions = {
   titled: boolean
   /** The agent's card is on screen; without it the summary carries what the card would (main's spawn tree). */
   cardShown: boolean
-  /** Draw the summary as a tile and the sections on glass (medium and wide panes; compact draws plain lines, §10). */
+  /** Draw the summary as a tile and the sections on glass (medium and wide panes; compact draws plain lines). */
   panels?: boolean
 }
 
@@ -64,7 +64,7 @@ function edgeOf(ctx: ViewContext, agent: AgentRecord): string {
   return identityHex(agent) ?? ROLE.muted
 }
 
-/** The F3 bucket the agent's tokens are counted in, labelled by its weakest evidence (`verified` reads ◇ at best). */
+/** The bucket the agent's tokens are counted in, labelled by its weakest evidence (`verified` reads ◇ at best). */
 function BucketLine(ctx: ViewContext, analyses: Analyses, agent: AgentRecord) {
   const { Box, Text } = ctx.els
   const bucket = bucketOf(analyses.spend, agent.id)
@@ -291,7 +291,7 @@ function LastEvents(ctx: ViewContext, agent: AgentRecord) {
   ]
 }
 
-/** The focused agent's details (the one detail drawer every card press opens), in the contract's order. */
+/** The focused agent's details (the one detail drawer every card press opens), in a fixed order. */
 export function Inspector(ctx: ViewContext, analyses: Analyses, agent: AgentRecord, opts: InspectorOptions) {
   const { Box } = ctx.els
   const view = contextViewFor(ctx.snapshot, agent.id)

@@ -1,12 +1,12 @@
-// F1 · context visuals. `ContextFigures` is the one gauge line every card and
-// inspector draws: a Meter with the view's own % and window, or ∅ and the
-// latest prompt. `ContextPanel` is the inspector's context section: the gauge
-// (plus a Ring on desktop), the latest prompt, per-request prompt sizes as a
-// sparkline (plus a chart on desktop, marked only where a compaction or a
+// The context gauge's visuals. `ContextFigures` is the one gauge line every
+// card and inspector draws: a Meter with the view's own % and window, or ∅ and
+// the latest prompt. `ContextPanel` is the inspector's context section: the
+// gauge (plus a Ring on desktop), the latest prompt, per-request prompt sizes
+// as a sparkline (plus a chart on desktop, marked only where a compaction or a
 // context stop was captured), the stop reasons and compactions themselves, and
-// the window basis behind "why?". Draws from an AgentContextView only: a % or
-// a capacity is never computed here, and samples are per-request prompt sizes,
-// never cumulative (DESIGN-CONTRACT §4.7; Report 03 F1-1…F1-7).
+// the window basis behind "why?". Draws from an AgentContextView only: a % or a
+// capacity is never computed here, and samples are per-request prompt sizes,
+// never cumulative.
 
 import type { AgentContextView, AgentLedger, CompactionMark, Snapshot, TokenCounts, UsageRecord } from '../../types'
 import { isContextStopReason, peakIsExact } from '../lib/context'

@@ -1,11 +1,10 @@
-// Signal cards and their grid, shared by the Health and Collisions views
-// (Sunset Glass DESIGN-CONTRACT §11, §12): one card look for both tabs. A card
-// reads its level glyph and word, the source's own evidence label and title, the
-// agents with the why, then a footer row with the evidence toggle and the actions;
-// the opened evidence is drawn inside the card. The grid lays cards out in one
-// column up to wide, two in the wide layout and three when expanded, with rows
-// balanced (four cards are two by two) and a group of one card taking the whole
-// row. Workstream 3 owns this file.
+// Signal cards and their grid, shared by the Health and Collisions views: one
+// card look for both tabs. A card reads its level glyph and word, the source's
+// own evidence label and title, the agents with the why, then a footer row with
+// the evidence toggle and the actions; the opened evidence is drawn inside the
+// card. The grid lays cards out in one column up to wide, two in the wide
+// layout and three when expanded, with rows balanced (four cards are two by
+// two) and a group of one card taking the whole row.
 
 import type { RenderChildren } from 'claude-code'
 
@@ -24,7 +23,7 @@ export const MIN_TEXT = 12
 /** Agent chips a card draws; the rest are counted (`+N more agents`). */
 export const MAX_CHIPS = 8
 
-// KIT-CANDIDATE: SignalCard draws the level word beside its glyph (§12 Option A), the chips on the why line and a
+// KIT-CANDIDATE: SignalCard draws the level word beside its glyph, the chips on the why line and a
 // footer row (evidence toggle + actions). Drawn here until the kit's SignalCard takes these options.
 /** Levels whose card edge carries their colour (as the kit's SignalCard); the rest sit on the quiet glass edge. */
 const LOUD_LEVELS: ReadonlySet<HealthLevel> = new Set(['investigate', 'unresolved'])
@@ -108,7 +107,7 @@ export type EvidenceToggleInput = { key: string; open: boolean; label: string; o
 
 /**
  * The evidence toggle: `▸ evidence · 2 source events`, `▾` when open. A plain Button: on the terminal its marker keeps
- * the accent colour; on desktop, which draws a Button as one plain line (R1 §4.1), it is a dim plain label.
+ * the accent colour; on desktop, which draws a Button as one plain line, it is a dim plain label.
  */
 export function EvidenceToggle(ctx: ViewContext, toggle: EvidenceToggleInput) {
   const { Button, Text } = ctx.els
@@ -137,7 +136,7 @@ export function FooterRow(ctx: ViewContext, toggle: EvidenceToggleInput | undefi
 }
 
 /**
- * The opened evidence inside a card: a sunken glass panel on desktop (a selected detail, the one nesting §6 allows),
+ * The opened evidence inside a card: a sunken glass panel on desktop (a selected detail, the one nesting allowed),
  * an indented block on the terminal, where a second border would cost two rows and four cells.
  */
 export function EvidencePanel(ctx: ViewContext, children: RenderChildren) {

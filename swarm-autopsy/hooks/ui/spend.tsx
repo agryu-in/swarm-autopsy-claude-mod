@@ -1,10 +1,10 @@
-// View E, Spend (DESIGN-CONTRACT §8.6; Sunset Glass §11 "Spend"): the session
-// hero and the ledger table (F2), the largest token use, then spend vs outcome
-// (F3). Selecting an agent anywhere here focuses it pane-wide (`ui.focus`); its
-// ledger and outcome details open under its ledger row. ≈$ appears only once
-// the person turns cost on, always dated, API-equivalent and not a charge.
-// Expanded (≥ 140 columns) the view reorganises rather than stretches: the hero
-// beside the table, and largest use beside spend vs outcome.
+// View E, Spend: the session hero and the ledger table, the largest token use,
+// then spend vs outcome. Selecting an agent anywhere here focuses it pane-wide
+// (`ui.focus`); its ledger and outcome details open under its ledger row. ≈$
+// appears only once the person turns cost on, always dated, API-equivalent and
+// not a charge. Expanded (≥ 140 columns) the view reorganises rather than
+// stretches: the hero beside the table, and largest use beside spend vs
+// outcome.
 
 import type { ViewContext } from './common'
 import { ROLE } from '../lib/palette'

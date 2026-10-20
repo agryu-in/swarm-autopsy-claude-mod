@@ -1,9 +1,9 @@
-// Visual redesign acceptance (DESIGN-CONTRACT §10.1; Report 03 §5, AT-1…AT-24).
+// Pane-wide acceptance tests (AT-1…AT-24).
 // The whole pane is mounted through the engine's own test host with a SIMULATED
 // snapshot seeded through `state.get`; every tab, selection and disclosure is
 // walked on the terminal and desktop surfaces at several widths, and the drawn
-// tree is read as logical lines (tests/view-helpers). Lead-owned: these tests
-// define "done" for every workstream and are never edited by one.
+// tree is read as logical lines (tests/view-helpers). These tests define "done"
+// for every view.
 
 import type { On } from 'claude-code'
 import { describe, expect, mock, test, type Engine } from 'claude-code/testing'

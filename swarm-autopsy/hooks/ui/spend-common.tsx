@@ -1,10 +1,9 @@
 // Small pieces the Spend tab's ledger, bars and outcome sections share: bucket
 // badges and pills, the "usage unknown" wording, note lines, the terminal's
-// cell padding, and the Sunset Glass pieces (DESIGN-CONTRACT §6, §8): sections
-// that are glass tiles from the medium layout up, and the fixed-width Box cells
-// that line the desktop's columns up whatever its proportional font does
-// (R1 §5.3). Pure drawing over the views' own fields; nothing here prices or
-// classifies.
+// cell padding, and the glass pieces: sections that are glass tiles from the
+// medium layout up, and the fixed-width Box cells that line the desktop's
+// columns up whatever its proportional font does. Pure drawing over the views'
+// own fields; nothing here prices or classifies.
 
 import type { RenderChildren } from 'claude-code'
 
@@ -19,13 +18,13 @@ import { AgentChip, CostText, GlassPanel, Heading, MeasureTag, type GlassTone } 
 
 export type BucketName = SpendBucket['bucket']
 
-/** What the ledger table needs from F3: each row's bucket, and the focused agent's outcome detail. */
+/** What the ledger table needs from spend vs outcome: each row's bucket, and the focused agent's outcome detail. */
 export type LedgerLinks = { outcome?: SpendOutcome; trail?: Trail }
 
-/** F3's bucket ids in words: the one table every view uses (`BUCKET_WORDS`, Sunset Glass §4.3). */
+/** The outcome bucket ids in words: the one table every view uses (`BUCKET_WORDS`). */
 export const BUCKET_LABEL: Record<BucketName, string> = BUCKET_WORDS
 
-// The bucket badge and pill are the kit's (one badge for every view, Sunset Glass §8); re-exported for Spend's files.
+// The bucket badge and pill are the kit's (one badge for every view); re-exported for Spend's files.
 export { BucketBadge, BucketPill } from './kit'
 
 /** Whether these totals carry any observed token count. */
@@ -35,7 +34,7 @@ export function hasUsage(totals: Pick<LedgerTotals, 'requests'> | undefined): bo
 
 /**
  * Usage the ledger cannot give as a number: requests that all came back without usage, or none heard at all.
- * Never a zero (DESIGN-CONTRACT §4.3, O5).
+ * Never a zero.
  */
 export function unknownUsageText(totals: Pick<LedgerTotals, 'requests' | 'requestsWithoutUsage'> | undefined): string {
   const without = totals?.requestsWithoutUsage ?? 0
@@ -161,12 +160,12 @@ export function NoteLine(ctx: ViewContext, note: string, color?: string) {
   )
 }
 
-// ── Sunset Glass: sections and cells ──
+// ── Glass: sections and cells ──
 
 /** Cells a tile's round border and side padding take from its width (both surfaces size by the terminal's cells). */
 const TILE_FRAME_CELLS = 4
 
-// KIT-CANDIDATE: a section that is a glass tile from the medium layout up and plain lines in the compact one (§10: no
+// KIT-CANDIDATE: a section that is a glass tile from the medium layout up and plain lines in the compact one (no
 // tiles when compact). GlassPanel has no compact form today.
 /** A section: a glass tile (`tone`) with its title from the medium layout up; a heading over plain lines when compact. */
 export function Section(

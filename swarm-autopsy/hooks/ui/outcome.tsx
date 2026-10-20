@@ -1,13 +1,13 @@
-// F3 · Spend vs outcome: a 100% bar of the tokens processed by bucket, the
+// Spend vs outcome: a 100% bar of the tokens processed by bucket, the
 // denominator it is a share of, one selectable row per bucket (selecting one
 // lists its agents and their contributions' evidence), and an agent's outcome
 // detail (also the Live inspector's). Every number carries its measure label;
 // unknown usage is ∅, never 0%; ≈$ goes through CostText only.
 //
-// Sunset Glass (§11 "Spend"): the section is a glass tile from the medium
-// layout up; the bar is the kit's shared BucketBar (unresolved and unknown in
-// the quiet `unknownFill`, the unknown tail `░`); on the desktop the bucket rows
-// are pills with their figures in aligned cells, and "none in" is muted chips.
+// The section is a glass tile from the medium layout up; the bar is the kit's
+// shared BucketBar (unresolved and unknown in the quiet `unknownFill`, the
+// unknown tail `░`); on the desktop the bucket rows are pills with their
+// figures in aligned cells, and "none in" is muted chips.
 
 import type { AgentOutcome, ContributionOutcome, SpendBucket, SpendOutcome } from '../../types'
 import { agentName, compact, displayPath, plural, truncate } from '../lib/format'
@@ -286,7 +286,7 @@ function NoneIn(ctx: ViewContext, empty: readonly SpendBucket['bucket'][]) {
 
 /**
  * The Spend tab's spend vs outcome: the 100% bar, the denominator (its basis behind a disclosure), one row per bucket
- * with agents, tokens, share and ≈$ (cost on), the buckets with no agent, the meanings and F3's notes.
+ * with agents, tokens, share and ≈$ (cost on), the buckets with no agent, the meanings and the outcome notes.
  */
 export function SpendOutcomePanel(ctx: ViewContext, outcome: SpendOutcome, trail: Trail, showCost: boolean) {
   const { Box, Text } = ctx.els
@@ -458,7 +458,7 @@ function mixLine(agent: AgentOutcome): string | undefined {
   return `contributions: ${parts.join(', ')}; counted once under mixed, usage not split`
 }
 
-/** The usage F3 counted for this agent, once, and its ≈$ only when the person turned cost on (fixes D2). */
+/** The usage counted for this agent's outcome, once, and its ≈$ only when the person turned cost on. */
 function UsageLine(ctx: ViewContext, agent: AgentOutcome) {
   const { Text } = ctx.els
   const u = agent.usage
@@ -480,7 +480,7 @@ function UsageLine(ctx: ViewContext, agent: AgentOutcome) {
   )
 }
 
-/** An agent's outcome: its bucket, the usage F3 counted, each contribution with its evidence, and its hand-back. */
+/** An agent's outcome: its bucket, the usage counted for it, each contribution with its evidence, and its hand-back. */
 export function AgentOutcomeDetail(ctx: ViewContext, agent: AgentOutcome | undefined, trail: Trail) {
   const { Box, Text } = ctx.els
   if (!agent) {

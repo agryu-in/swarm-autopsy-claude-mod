@@ -47,6 +47,32 @@ describe('classify', () => {
     expect(verificationKind("cat >> a.js <<'EOF'\nx\nEOF\nnode --test test/a.test.js")).toBe('test')
   })
 
+  // An empty heredoc closes on the very next line, so what follows it runs.
+  test('a heredoc closes at its first closing line, even with an empty body', () => {
+    expect(verificationKind('cat > a.txt <<EOF\nEOF\nnpm test\nEOF')).toBe('test')
+    expect(verificationKind("cat <<-'END'\n\tnpm test\n\tEND\necho done")).toBeUndefined()
+  })
+
+  // Found by the security audit: the heredoc pattern backtracked over the whole command for every `<<`, so a
+  // crafted command of a few hundred KB stalled the tool call it rode on for seconds (the digits for 90 s). Each now
+  // takes well under 100 ms alone; the budget leaves room for a loaded machine running every test file at once.
+  test('reads a crafted command in linear time', () => {
+    const SIZE = 200_000
+    const BUDGET_MS = 1000
+    const crafted = [
+      `cat <<${'A'.repeat(SIZE / 10)}\n${'x'.repeat(SIZE)}`,
+      'cat <<A\n'.repeat(SIZE / 8),
+      `cat <<'${'B'.repeat(SIZE)}`,
+      `echo ${'1'.repeat(SIZE)}`,
+      `echo ${'"a\\'.repeat(SIZE / 3)}`,
+    ]
+    for (const command of crafted) {
+      const started = performance.now()
+      verificationKind(command)
+      expect(performance.now() - started).toBeLessThan(BUDGET_MS)
+    }
+  })
+
   // Found in the in-session run: `cd <demo> && npm test` was read as running in the session's directory.
   test('a leading cd sets the directory the rest of the command runs in', () => {
     expect(leadingDirectory('cd /repo/app && npm test')).toBe('/repo/app')

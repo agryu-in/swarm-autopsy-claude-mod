@@ -1,9 +1,9 @@
-// Workstream B · the Spend tab's redesign (DESIGN-CONTRACT §8.6): session block,
-// ledger table, largest token use, spend vs outcome, and the two agent details
-// the Live inspector also calls. SIMULATED fixtures only. Views are drawn with a
-// plain-data element table and read as logical lines (tests/view-helpers); the
-// last block mounts the whole pane through the engine's test host, so a prop
-// the surface refuses fails here on both surfaces.
+// The Spend tab: session block, ledger table, largest token use, spend vs
+// outcome, and the two agent details the Live inspector also calls. SIMULATED
+// fixtures only. Views are drawn with a plain-data element table and read as
+// logical lines (tests/view-helpers); the last block mounts the whole pane
+// through the engine's test host, so a prop the surface refuses fails here on
+// both surfaces.
 
 import type { On } from 'claude-code'
 import { describe, expect, mock, test, type Engine } from 'claude-code/testing'
@@ -163,7 +163,7 @@ function findButton(node: DrawnNode, key: string): { props?: Record<string, unkn
   return undefined
 }
 
-/** The Spend tab as drawn; `priced` builds the views with prices whatever `showCost` says (the D2 case). */
+/** The Spend tab as drawn; `priced` builds the views with prices whatever `showCost` says. */
 function spend(snapshot: Snapshot, width: number, draw: Draw = {}, priced = draw.showCost === true): Screen {
   const { ctx, calls } = stub(snapshot, width, draw)
   return screenOf(SpendView(ctx, analysesFor(snapshot, priced)), calls)
@@ -477,7 +477,7 @@ describe('AgentLedgerDetail and AgentOutcomeDetail', () => {
     expect(outcome.keys.some(k => k.startsWith('od-tr-'))).toBe(true)
   })
 
-  test('D2: a priced view with cost hidden draws no $ anywhere, in either detail or on the tab', () => {
+  test('a priced view with cost hidden draws no $ anywhere, in either detail or on the tab', () => {
     for (const id of AGENTS) {
       const { ledger, outcome } = detail(id, 80, { showCost: false }, true)
       expect([...ledger.lines, ...outcome.lines].filter(l => DOLLAR.test(l))).toEqual([])
@@ -490,7 +490,7 @@ describe('AgentLedgerDetail and AgentOutcomeDetail', () => {
     }
   })
 
-  test('with cost on the outcome detail’s ≈$ is drawn once through CostText, dated and not a charge (O4)', () => {
+  test('with cost on the outcome detail’s ≈$ is drawn once through CostText, dated and not a charge', () => {
     const { outcome } = detail('implementer', 80, { showCost: true })
     const line = outcome.lines.find(l => /≈\$/.test(l)) ?? ''
     expect(line).toContain('API-equivalent at 2026-10-06 prices, not a charge')
@@ -538,7 +538,7 @@ describe('Spend · ledger notes', () => {
   })
 })
 
-// ── Sunset Glass: the desktop drawing (DESIGN-CONTRACT §11 "Spend", §6, §8, §10) ──
+// ── the desktop drawing ──
 
 type El = Exclude<DrawnNode, string | number | boolean | null | undefined>
 const isEl = (node: DrawnNode): node is El => node !== null && typeof node === 'object'
@@ -565,7 +565,7 @@ const figureCells = (row: DrawnNode) => everyEl(row).filter(el => isBox(el) && e
 const TOKEN_HEX = TOKEN_CATEGORIES.map(c => c.hex)
 const desk = (snapshot: Snapshot, width: number, draw: Draw = {}) => spend(snapshot, width, { ...draw, surface: 'desktop' })
 
-describe('Spend · Sunset Glass: the session hero tile', () => {
+describe('Spend · glass: the session hero tile', () => {
   test('desktop: the total sits in a raised glass tile, with a Box token bar, legend pills with exact figures, the requests and the toggle', () => {
     const s = desk(richSession(), 116)
     const hero = byKey(s.tree, 'sp-hero')
@@ -625,7 +625,7 @@ describe('Spend · Sunset Glass: the session hero tile', () => {
   })
 })
 
-describe('Spend · Sunset Glass: the ledger table', () => {
+describe('Spend · glass: the ledger table', () => {
   test('desktop: fixed-width Box cells, figures mono and right-aligned, the same columns on the header, the session row and every agent row', () => {
     for (const showCost of [false, true]) {
       const s = desk(richSession(), 116, { showCost })
@@ -673,7 +673,7 @@ describe('Spend · Sunset Glass: the ledger table', () => {
   })
 })
 
-describe('Spend · Sunset Glass: largest token use', () => {
+describe('Spend · glass: largest token use', () => {
   const IDS = ['implementer', 'main', 'tester', 'explorer', 'reviewer', 'constructor']
 
   test('desktop: ShareBars in one analytical hue, aligned starts, the figures in a right column', () => {
@@ -714,7 +714,7 @@ describe('Spend · Sunset Glass: largest token use', () => {
   })
 })
 
-describe('Spend · Sunset Glass: spend vs outcome', () => {
+describe('Spend · glass: spend vs outcome', () => {
   test('desktop: the shared bucket bar with unknown usage quiet, bucket rows as pills, "none in" as muted chips', () => {
     const s = desk(richSession(), 116)
     const bar = byKey(s.tree, 'spo-bar')
@@ -744,7 +744,7 @@ describe('Spend · Sunset Glass: spend vs outcome', () => {
   })
 })
 
-describe('Spend · Sunset Glass: the agent details', () => {
+describe('Spend · glass: the agent details', () => {
   const detail = (id: string, width: number, surface: 'terminal' | 'desktop') => {
     const snapshot = richSession()
     const analyses = analysesFor(snapshot, false)
@@ -789,7 +789,7 @@ describe('Spend · Sunset Glass: the agent details', () => {
   })
 })
 
-describe('Spend · Sunset Glass: layouts', () => {
+describe('Spend · glass: layouts', () => {
   test('expanded (≥ 140): the hero tile and the ledger table sit side by side; a narrower pane stacks them', () => {
     const wide = desk(richSession(), 160)
     const top = byKey(wide.tree, 'sp-top')

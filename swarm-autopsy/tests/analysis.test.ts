@@ -161,7 +161,7 @@ describe('contribution trail', () => {
   })
 })
 
-// Regressions found in the first live run (live-test/runs/20261016T092140Z).
+// Regressions found in the first recorded live run.
 describe('contribution trail: live-run regressions', () => {
   const PROJECT = '/home/dev/projects/demo-run/runs/20261016T092140Z/demo'
 
@@ -369,9 +369,9 @@ describe('trail map', () => {
     const trail = buildTrail(snapshot)
     const { source } = trailSvg(snapshot, trail)
     const nodes = trail.lanes.reduce((n, lane) => n + lane.nodes.length, 0)
-    // One stage pill per node (Sunset Glass: nodes are rounded pills).
+    // One stage pill per node (nodes are rounded pills).
     expect(source.match(/<rect class="pill" x="\d+" y="\d+"/g)?.length).toBe(nodes)
-    // Report hand-backs to the spawner stay in the list and are left out of the map (DESIGN-CONTRACT §8.3).
+    // Report hand-backs to the spawner stay in the list and are left out of the map.
     expect(source.match(/<path d="M[\d.]+,[\d.]+ C/g)?.length).toBe(trail.edges.filter(e => !e.to.startsWith('agent:')).length)
     expect(source).not.toContain('<script>')
     expect(source).toContain('&lt;script&gt;')
@@ -477,7 +477,7 @@ describe('collisions', () => {
   })
 })
 
-// vNext: the trail facts F3 (spend vs outcome) relies on.
+// The trail facts spend vs outcome relies on.
 describe('trail facts for outcome classification', () => {
   const edit = (agent: string, id: string, to: string) =>
     tool(agent, id, 'Edit', { file_path: '/repo/src/a.ts', old_string: 'x', new_string: to })

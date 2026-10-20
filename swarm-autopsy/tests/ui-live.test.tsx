@@ -1,8 +1,8 @@
-// Workstream A · Live view, agent cards and context visuals (DESIGN-CONTRACT
-// §8.2). The whole pane is mounted through the engine's own test host with a
-// SIMULATED snapshot seeded through `state.get`, as the acceptance suite does,
-// and the drawn tree is read as data: lines, button keys, borders and Svg.
-// No live session, model or network is involved.
+// Live view, agent cards and context visuals. The whole pane is mounted through
+// the engine's own test host with a SIMULATED snapshot seeded through
+// `state.get`, as the acceptance suite does, and the drawn tree is read as
+// data: lines, button keys, borders and Svg. No live session, model or network
+// is involved.
 
 import type { On } from 'claude-code'
 import { describe, expect, mock, test, type Engine } from 'claude-code/testing'
@@ -257,9 +257,9 @@ describe('Live: compact terminal layout (49 columns)', () => {
   })
 })
 
-// ── unknown usage (O5) ──
+// ── unknown usage ──
 
-describe('Live: usage that came back without counts (O5)', () => {
+describe('Live: usage that came back without counts', () => {
   test('an agent whose requests all returned no usage, or with none heard, reads usage unknown, never an observed zero', SLOW, async ($, on) => {
     seeded(on, session())
     for (const width of [49, 80, 116]) {
@@ -457,9 +457,9 @@ describe('Live: narrow desktop panes draw the full cards', () => {
   })
 })
 
-// ── files (D3) ──
+// ── files ──
 
-describe('Live: files read and written (D3)', () => {
+describe('Live: files read and written', () => {
   test('a search root is not counted or listed as a file read; it is listed as a searched path', SLOW, async ($, on) => {
     seeded(on, session())
     const ui = await mount($, 'terminal', 80)
@@ -647,7 +647,7 @@ describe('Live: platform boundary and labels', () => {
           }
           const live = lines(tree)
           expect({ where, bad: live.filter(l => FORBIDDEN.test(l)) }).toEqual({ where, bad: [] })
-          // The auditor's inspector holds Workstream B's ledger detail, whose zero line is B's O5 fix (DESIGN-CONTRACT §10.1).
+          // The auditor's inspector holds Spend's ledger detail, whose zero line Spend's own tests cover.
           const zeros = focus === 'auditor' ? [] : lines(byKey(tree, 'lv-root')).filter(l => OBSERVED_ZERO.test(l))
           expect({ where, zeros }).toEqual({ where, zeros: [] })
           const mine = lines(byKey(tree, 'lv-root'))
@@ -749,7 +749,7 @@ describe('Live: many agents', () => {
   })
 })
 
-// ── the whole card opens its details (Sunset Glass DESIGN-CONTRACT §9) ──
+// ── the whole card opens its details ──
 
 /** A card's press targets in drawing order: `card-<id>` first, then its `cardrow-<id>-<n>` lines. */
 function lineKeys(tree: DrawnNode, id: string): string[] {
@@ -787,7 +787,7 @@ function placement(tree: DrawnNode, id: string, width: number): boolean {
   return byKey(byKey(tree, 'lv-detail'), `insp-${id}`) !== undefined && byKey(byKey(tree, 'lv-list'), `insp-${id}`) === undefined
 }
 
-describe('Live: the whole card opens its details (§9)', () => {
+describe('Live: the whole card opens its details', () => {
   for (const surface of ['terminal', 'desktop'] as const) {
     test(`${surface}: every pressable line of a card and of the coordinator toggles that agent’s existing details, narrow to wide`, SLOW, async ($, on) => {
       seeded(on, session({ mainActive: true }))
@@ -914,7 +914,7 @@ describe('Live: the whole card opens its details (§9)', () => {
   })
 })
 
-// ── expanded (≥ 140 columns): a third column, not a stretch (§10) ──
+// ── expanded (≥ 140 columns): a third column, not a stretch ──
 
 describe('Live: expanded layout', () => {
   test('cards, details, and activity with Health each get a column; the press opens the details in the middle one', SLOW, async ($, on) => {

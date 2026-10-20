@@ -1,4 +1,4 @@
-// SIMULATED FIXTURES for the vNext modules (ledger, context, spend vs outcome).
+// SIMULATED FIXTURES for the token features (ledger, context, spend vs outcome).
 // Builders for tests only: never imported by hooks/, never written into a
 // live collector.
 
@@ -19,7 +19,7 @@ export type UsageOptions = {
   stopReason?: string | null
 }
 
-/** One request's record as the F2 normalizer would produce it from a `turn.step` result. */
+/** One request's record as the ledger's normalizer would produce it from a `turn.step` result. */
 export function usageRecord(options: UsageOptions = {}): UsageRecord {
   const agentId = options.agentId ?? 'main'
   const turnId = options.turnId ?? `turn-${agentId}`

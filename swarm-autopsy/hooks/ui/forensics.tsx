@@ -1,9 +1,9 @@
-// View D, Session Forensics (DESIGN-CONTRACT §8.5; Sunset Glass WS2): every
-// observed event in order, filterable by kind (chips with counts) and by agent (a
-// Select, chips in the compact dock, the pane's focused agent by default), paged,
-// with the selected event's whole evidence beneath. Desktop: the timeline is one
-// glass panel of aligned rows (the selected one lit), and the evidence a sunken
-// panel with paths, commands and the diff in mono; the terminal keeps its lines.
+// View D, Session Forensics: every observed event in order, filterable by kind
+// (chips with counts) and by agent (a Select, chips in the compact dock, the
+// pane's focused agent by default), paged, with the selected event's whole
+// evidence beneath. Desktop: the timeline is one glass panel of aligned rows
+// (the selected one lit), and the evidence a sunken panel with paths, commands
+// and the diff in mono; the terminal keeps its lines.
 
 import type { ForensicEvent, HealthLevel, TimelineFilter } from '../../types'
 import { agentName, displayPath, offset, plural, truncate } from '../lib/format'

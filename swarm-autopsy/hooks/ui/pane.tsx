@@ -1,5 +1,5 @@
 // The pane: header (status, tabs, KPI strip, legend), the selected view, the
-// footer. Lead-owned central rendering (DESIGN-CONTRACT §5, §8).
+// footer. The central rendering.
 
 import type { HealthSignal, LedgerView, SpendOutcome } from '../../types'
 import type { Collisions } from '../lib/collisions'
@@ -16,9 +16,9 @@ import { TrailView } from './trail'
 export type Analyses = {
   trail: Trail
   collisions: Collisions
-  /** F2: usage per agent, direct and subtree, priced only when the person turned cost on. */
+  /** Token ledger: usage per agent, direct and subtree, priced only when the person turned cost on. */
   ledger: LedgerView
-  /** F3: the ledger's usage set against the trail's outcomes. */
+  /** Spend vs outcome: the ledger's usage set against the trail's outcomes. */
   spend: SpendOutcome
   /** Swarm Health: the signals the analyses above already raised, in one shape (lib/signals). */
   health: HealthSignal[]

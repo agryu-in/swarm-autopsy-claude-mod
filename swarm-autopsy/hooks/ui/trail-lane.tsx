@@ -1,12 +1,12 @@
-// The Trail's lanes as native rows (Workstream C; Sunset Glass WS2): the
-// clickable twin of the map, carrying every node, edge and basis. One lane per
-// agent: a glass card edged in its identity (medium and wide), its header
-// (identity chip, delegation, F3 badge), its nodes grouped by stage, each
-// node's outgoing edges (solid ◆ LINKED, dashed ◇ INFERRED), and its flags.
+// The Trail's lanes as native rows: the clickable twin of the map, carrying
+// every node, edge and basis. One lane per agent: a glass card edged in its
+// identity (medium and wide), its header (identity chip, delegation, outcome
+// badge), its nodes grouped by stage, each node's outgoing edges (solid ◆
+// LINKED, dashed ◇ INFERRED), and its flags.
 // A selected node opens its evidence right under itself; its path is marked.
-// Desktop: a Button draws only a plain label (R1 §4.1), so chips and badges sit
-// beside the header Buttons, and columns and indents are Box cells, never runs
-// of spaces in a proportional font (R1 §5.3).
+// Desktop: a Button draws only a plain label, so chips and badges sit beside
+// the header Buttons, and columns and indents are Box cells, never runs of
+// spaces in a proportional font.
 
 import type { Evidence, SpendOutcome, TrailFilter } from '../../types'
 import { BUCKET_WORDS, EVIDENCE_COLOR, EVIDENCE_GLYPH, STATE_GLYPH, VERDICT_COLOR, VERDICT_GLYPH, displayPath, shortId, truncate } from '../lib/format'
@@ -204,7 +204,10 @@ function EdgeLine(scope: LaneScope, edge: TrailEdge, indent: number, last: boole
   return proportional(ctx) ? <Box marginLeft={indent}>{line}</Box> : line
 }
 
-/** The selected node's evidence: its title and lines, every edge with its basis, its flags, F3's verdict and its events. */
+/**
+ * The selected node's evidence: its title and lines, every edge with its basis, its flags, the outcome verdict and its
+ * events.
+ */
 function NodeEvidence(scope: LaneScope, placed: PlacedNode, indent: number) {
   const { ctx, trail } = scope
   const { Box, Text } = ctx.els
@@ -215,7 +218,7 @@ function NodeEvidence(scope: LaneScope, placed: PlacedNode, indent: number) {
     f => f.nodeId === node.id || (node.stage === 'verification' && isCommandFlag(f) && f.command === node.command && f.cwd === node.cwd),
   )
   const outcome = scope.spend.agents.find(a => a.agentId === node.agentId)?.contributions.filter(c => c.nodeIds.includes(node.id)) ?? []
-  // Desktop: the selected detail is the one panel inside the lane card, sunken (Sunset Glass §6).
+  // Desktop: the selected detail is the one panel inside the lane card, sunken.
   const surface = proportional(ctx) ? { ...glass(ctx, 'sunken'), paddingX: 1 } : {}
   return (
     <Box flexDirection="column" marginLeft={indent} {...surface}>
@@ -334,7 +337,7 @@ function Delegated(scope: LaneScope, agentId: string, lead = ' · ') {
   )
 }
 
-/** The desktop badge: the F3 bucket as a pill edged in its colour, after a dim arrow. */
+/** The desktop badge: the outcome bucket as a pill edged in its colour, after a dim arrow. */
 function BadgePill(scope: LaneScope, agentId: string) {
   const { ctx } = scope
   const { Box, Text } = ctx.els
@@ -373,7 +376,7 @@ function headerLabel(ctx: ViewContext, agentId: string, focused: boolean, room?:
 /**
  * A lane's header (medium and wide); pressing it puts the agent in focus. Terminal: one Button holding the styled runs.
  * Desktop: the chip beside a plain Button (the desktop draws a Button's content unstyled), then the delegation and the
- * F3 badge as styled text on the same row.
+ * outcome badge as styled text on the same row.
  */
 function ListHeader(scope: LaneScope, lane: TrailLane) {
   const { ctx } = scope

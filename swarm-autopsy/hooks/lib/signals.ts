@@ -1,11 +1,11 @@
-// Swarm Health (DESIGN-CONTRACT §8.7, Report 03 §7): the findings the existing
+// Swarm Health: the findings the existing
 // analyses already raised, mapped to one shape for the Health tab, the Live
 // strip and the header. Pure. No score, no threshold, no new detection: every
 // entry is one export's own finding, with its own words, its own scale and its
 // own evidence label. Where a source has a sentence, the title is that
 // sentence's lead and `why` the sentence verbatim; where it has only fields (a
 // stop reason, a compaction, a drop count), the text states those fields and
-// nothing more. Workstream D owns this file.
+// nothing more.
 
 import type { AgentOutcome, ContributionOutcome, Evidence, HealthLevel, HealthSignal, LedgerView, Snapshot, SpendOutcome } from '../../types'
 import type { Collisions } from './collisions'
@@ -24,7 +24,7 @@ export type HealthInputs = {
 /** The id of the one entry that is a value, not a finding: main's context fill (no threshold applies to it). */
 export const MAIN_CONTEXT_ID = 'ctx:main:percent'
 
-/** F3 buckets that ask for a look: their agents' work is not established as verified. */
+/** Outcome buckets that ask for a look: their agents' work is not established as verified. */
 const OUTCOME_BUCKETS: ReadonlySet<AgentOutcome['bucket']> = new Set(['changed-unverified', 'failed-or-inconclusive', 'mixed', 'unresolved'])
 
 /** Categories a mixed agent's representative contribution is never taken from. */
@@ -70,7 +70,7 @@ export function findingsOf(signals: readonly HealthSignal[]): HealthSignal[] {
 }
 
 /**
- * The one unresolved count every view draws (Sunset Glass §12, SG-U): the findings whose source's evidence is UNRESOLVED,
+ * The one unresolved count every view draws: the findings whose source's evidence is UNRESOLVED,
  * the entries Health marks `?`. A count over `gatherSignals`' output; it changes no analysis.
  */
 export function unresolvedOf(signals: readonly HealthSignal[]): HealthSignal[] {
@@ -159,7 +159,7 @@ function sizesText(before: number | undefined, after: number | undefined): strin
   return 'token counts not captured'
 }
 
-/** F1: main's context fill as a value, then each agent's captured context stop reasons and compactions. */
+/** Context gauge: main's context fill as a value, then each agent's captured context stop reasons and compactions. */
 function contextSignals(snapshot: Snapshot): HealthSignal[] {
   const main = contextViewFor(snapshot, 'main').percent
   const fill =
@@ -207,7 +207,10 @@ function ledgerEntry(fields: Pick<HealthSignal, 'id' | 'why' | 'agentIds'> & { e
   }
 }
 
-/** F2: usage carried by ids never seen as agents, turns that disagree with turn.complete, duplicates, requests without usage. */
+/**
+ * Token ledger: usage carried by ids never seen as agents, turns that disagree with turn.complete, duplicates,
+ * requests without usage.
+ */
 function ledgerSignals(snapshot: Snapshot, ledger: LedgerView): HealthSignal[] {
   const unknown = ledger.rows
     .filter(row => row.attribution.evidence === 'UNRESOLVED')
@@ -237,7 +240,7 @@ function representative(agent: AgentOutcome): ContributionOutcome | undefined {
   return list.find(c => c.category === agent.bucket) ?? list[0]
 }
 
-/** F3: agents whose work the evidence does not establish as verified, with the basis of their contribution. */
+/** Spend vs outcome: agents whose work the evidence does not establish as verified, with their contribution's basis. */
 function outcomeSignals(spend: SpendOutcome): HealthSignal[] {
   return spend.agents.flatMap(agent => {
     if (!OUTCOME_BUCKETS.has(agent.bucket)) return []

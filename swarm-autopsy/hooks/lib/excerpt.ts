@@ -65,10 +65,6 @@ export function createOverlapper(): Overlapper {
   return (source, target, exclude = '') => overlapOf(index(source), index(target), index(exclude))
 }
 
-export function verbatimOverlap(source: string, target: string, exclude = ''): Overlap | undefined {
-  return createOverlapper()(source, target, exclude)
-}
-
 /** A path-like mention both lists contain, equal or one a path suffix of the other. */
 export function sharedMention(a: readonly string[], b: readonly string[]): string | undefined {
   for (const left of a) {

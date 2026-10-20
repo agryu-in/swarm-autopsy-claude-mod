@@ -1,9 +1,8 @@
-// The shared components (visual-redesign DESIGN-CONTRACT §6; Sunset Glass
-// DESIGN-CONTRACT §8). Every view draws identity, state, meters, bars, costs,
-// chips, signals, rows and glass surfaces through these, so each looks and labels
-// the same everywhere. The block bars, glass surfaces and press rows live in
-// bars.tsx, glass.tsx and press.tsx and are re-exported here. Lead-owned: a
-// workstream that needs a variant asks for it rather than drawing its own.
+// The shared components. Every view draws identity, state, meters, bars, costs,
+// chips, signals, rows and glass surfaces through these, so each looks and
+// labels the same everywhere. The block bars, glass surfaces and press rows
+// live in bars.tsx, glass.tsx and press.tsx and are re-exported here. A view
+// that needs a variant gets it added here rather than drawing its own.
 
 import type { RenderChildren } from 'claude-code'
 
@@ -37,7 +36,7 @@ export function layoutFor(width: number): Layout {
   return width < WIDE_FROM ? 'medium' : 'wide'
 }
 
-/** From this many body columns a wide pane is expanded (Sunset Glass §10): views reorganise, they do not stretch. */
+/** From this many body columns a wide pane is expanded: views reorganise, they do not stretch. */
 export const EXPANDED_FROM = 140
 
 /** Whether the pane is wide enough for the expanded arrangement (the desktop pane is often about 160 columns). */
@@ -135,7 +134,7 @@ export function MeasureTag(ctx: ViewContext, measure: Measure, withWord = true) 
 }
 
 /**
- * The only drawer of ≈$ (DESIGN-CONTRACT §4.6): `≈$1.23`, `+` when a model had no price, and nothing at all when the
+ * The only drawer of ≈$: `≈$1.23`, `+` when a model had no price, and nothing at all when the
  * person has not turned cost on, whatever the view carries.
  */
 export function CostText(ctx: ViewContext, cost: CostEstimate | undefined, showCost: boolean) {
@@ -155,7 +154,7 @@ export function CostText(ctx: ViewContext, cost: CostEstimate | undefined, showC
 
 /**
  * A title's colour props: the theme's heading colour (Abyssal's pale sand), or none at all, so a classic drawing (and
- * the terminal) keeps the surface's own text colour and its tree exactly as before themes (SG-14).
+ * the terminal) keeps the surface's own text colour and its tree exactly as before themes.
  */
 export function headingInk(): { color?: string } {
   const color = ROLE.heading
@@ -169,7 +168,7 @@ function subMarkFor(ctx: ViewContext): string {
 
 /**
  * A section heading: the accent `▌` mark and a semibold title in the theme's heading colour, with an optional dim
- * summary (Sunset Glass §7). `level: 2` is a sub-heading inside a panel: the theme's sub-heading mark in rose (classic
+ * summary. `level: 2` is a sub-heading inside a panel: the theme's sub-heading mark in rose (classic
  * `·`, Abyssal `▎`), body size. With `toggleId` it opens and closes.
  */
 export function Heading(ctx: ViewContext, title: string, opts: { summary?: string; toggleId?: string; level?: 1 | 2 } = {}) {
@@ -215,7 +214,7 @@ export function Heading(ctx: ViewContext, title: string, opts: { summary?: strin
 export function Disclosure(ctx: ViewContext, id: string, label: string, body: () => RenderChildren) {
   const { Box, Text, Button } = ctx.els
   const open = isOpen(ctx, id)
-  // The desktop draws a Button's label only, one plain line (R1 §4.1): there the marker and words are the label.
+  // The desktop draws a Button's label only, one plain line: there the marker and words are the label.
   const button = paintsGlass(ctx) ? (
     <Button key={`dc-${id}`} plain dimColor label={`${open ? '▾' : '▸'} ${label}`} onPress={() => ctx.act.toggleOpen(id)} />
   ) : (
@@ -248,7 +247,7 @@ export function Row(
   if (ctx.surface !== 'terminal') {
     // The desktop app draws a Button's content without its runs' styles (seen in its paint, 2026-10-18: no chip, no
     // meter colour), so on desktop the marker is the Button and the styled content sits beside it, unstyled by no one.
-    // `cells` (aligned columns as fixed-width Boxes, Sunset Glass §8) replace the content's text there when given.
+    // `cells` (aligned columns as fixed-width Boxes) replace the content's text there when given.
     return (
       <Box key={`row-${props.key}`} flexDirection="row">
         <Button key={props.key} plain label={markerText} onPress={props.onPress} />
@@ -305,7 +304,7 @@ export function EmptyState(ctx: ViewContext, title: string, why: string, opts: {
 
 /**
  * A context meter: a text bar filled to `percent` and its measure label and value. UNAVAILABLE draws `∅ n/a` and no bar.
- * The percent is the view's own (F1's), never computed here.
+ * The percent is the view's own (the context gauge's), never computed here.
  */
 export function Meter(ctx: ViewContext, input: { percent?: number; measure: Measure; width: number; bare?: boolean }) {
   const { Text } = ctx.els
@@ -316,7 +315,7 @@ export function Meter(ctx: ViewContext, input: { percent?: number; measure: Meas
   const role = input.measure === 'ESTIMATED' ? ROLE.caution : ROLE.context
   const full = filled.replace(/[^█]/g, '')
   const partial = filled.slice(full.length)
-  // Every bar run is `mono`: in the desktop's monospaced face a `█` is one cell (R1 §5.2), so the meter fits its cells.
+  // Every bar run is `mono`: in the desktop's monospaced face a `█` is one cell, so the meter fits its cells.
   const bar = (
     <Text>
       {full ? (
@@ -449,7 +448,7 @@ export function SparkChart(ctx: ViewContext, input: { values: readonly number[];
   const picture = sparkSvg(input)
   if (!picture) return null
   const { Svg } = ctx.els
-  // Both sizes: an interactive Svg without a height is a 150 px frame with the chart letterboxed in it (R1 §6.1).
+  // Both sizes: an interactive Svg without a height is a 150 px frame with the chart letterboxed in it.
   return <Svg source={picture.source} alt={picture.alt} width={SPARK_CHART_PX} height={picture.height} isInteractive />
 }
 
@@ -534,7 +533,7 @@ export function Chips(ctx: ViewContext, keyPrefix: string, options: readonly Chi
   )
 }
 
-/** A source's own scale as glyph and colour (DESIGN-CONTRACT §3.2): never a new severity. */
+/** A source's own scale as glyph and colour: never a new severity. */
 export const LEVEL_STYLE: Record<HealthLevel, { glyph: string; role: string; word: string }> = {
   investigate: {
     glyph: '▲',
@@ -578,9 +577,9 @@ export type SignalAction = { key: string; label: string; onPress: () => void }
 // ── buckets ──
 
 /**
- * An F3 bucket in its colour and words (`BUCKET_WORDS`), led by the evidence glyph of the contribution that set it when
- * given (`verified` reads `◇` at best), else by a swatch (`░` for unknown usage, never a filled share). The one badge
- * every view draws (Sunset Glass §8).
+ * An outcome bucket in its colour and words (`BUCKET_WORDS`), led by the evidence glyph of the contribution that set it
+ * when given (`verified` reads `◇` at best), else by a swatch (`░` for unknown usage, never a filled share). The one
+ * badge every view draws.
  */
 export function BucketBadge(ctx: ViewContext, bucket: SpendBucket['bucket'], opts: { evidence?: Evidence } = {}) {
   const { Text } = ctx.els

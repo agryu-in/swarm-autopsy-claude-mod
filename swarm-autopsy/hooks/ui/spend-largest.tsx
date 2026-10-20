@@ -1,14 +1,14 @@
-// F2 · largest token use: one horizontal bar per agent of its direct tokens
-// processed, largest first, each a share of the session total (exact
-// arithmetic over observed counts). Never the spawn tree. With cost on, and
-// only when every estimate is complete, a second set of ≈$ bars; token shares
-// and ≈$ never share a bar.
+// The token ledger's largest token use: one horizontal bar per agent of its
+// direct tokens processed, largest first, each a share of the session total
+// (exact arithmetic over observed counts). Never the spawn tree. With cost on,
+// and only when every estimate is complete, a second set of ≈$ bars; token
+// shares and ≈$ never share a bar.
 //
-// Sunset Glass (§11 "Spend"): the bars are the kit's ShareBar in one analytical
-// hue (the coral is chrome, never data); ≈$ bars are amber, an estimate. On the
-// desktop each row is fixed-width Box cells, so every bar starts at the same
-// place and the figures stand in a right-aligned column; the terminal keeps one
-// padded monospaced line per row.
+// The bars are the kit's ShareBar in one analytical hue (the coral is chrome,
+// never data); ≈$ bars are amber, an estimate. On the desktop each row is
+// fixed-width Box cells, so every bar starts at the same place and the figures
+// stand in a right-aligned column; the terminal keeps one padded monospaced
+// line per row.
 
 import type { RenderChildren } from 'claude-code'
 

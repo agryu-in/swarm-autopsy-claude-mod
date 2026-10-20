@@ -1,8 +1,8 @@
-// F2 · one agent's ledger, as the Spend tab and the Live inspector both draw it:
-// the attribution basis once, the token categories once, its models, stop
+// One agent's token ledger, as the Spend tab and the Live inspector both draw
+// it: the attribution basis once, the token categories once, its models, stop
 // reasons and reconciliation, and one table of its recent requests. Token
 // counts are OBSERVED; ≈$ is drawn only through CostText, only when asked.
-// Sunset Glass: the kit's level-2 heading, the categories as a block bar, the
+// Drawn with the kit's level-2 heading, the categories as a block bar, the
 // request ids muted and monospaced, and on the desktop the request table in
 // fixed-width Box cells under a header (the terminal keeps one line a request).
 

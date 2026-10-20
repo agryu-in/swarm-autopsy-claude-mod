@@ -1,6 +1,6 @@
-// F2 · the usage ledger: `turn.step` results normalised into request records,
+// The token ledger: `turn.step` results normalised into request records,
 // folded into exact per-agent sums, and read back as a view with direct and
-// subtree totals. Pure and immutable; no `$`. (docs/vnext-contract.md §2, §4)
+// subtree totals. Pure and immutable; no `$`.
 
 import type {
   AgentLedger,
@@ -42,7 +42,7 @@ export type TurnReport = { turnId: string; agentId: string; at: number; tokens?:
 export type LedgerViewOptions = { showCost: boolean; engineCostUsd?: number; prices?: PriceTable }
 
 /**
- * Request keys remembered for dedupe (contract §6a). A duplicate arises when a
+ * Request keys remembered for dedupe. A duplicate arises when a
  * hook re-sends a step (same `turnId:index`) right away, so 500 recent keys
  * cover it comfortably. The window is kept small because the snapshot is
  * written to `$.state` on every dirty tick (every 250 ms while busy): 500 keys

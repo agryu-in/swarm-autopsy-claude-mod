@@ -1,12 +1,12 @@
-// View A, Live (Sunset Glass DESIGN-CONTRACT §10, §11): the coordinator strip
-// and one card or line per observed subagent, in spawn order, with state
-// filters, a compact Health strip and the recent activity. Pressing any line of
-// an agent's card opens its details (§9): in place under its card (medium), in
-// the detail column (wide), or instead of the list (compact). The desktop draws
-// the full cards at every width, the narrow dock (below 56 columns) included,
-// their lines reflowed onto more rows; only the terminal's compact pane draws
-// one line per agent. From 140 columns (expanded) the view reorganises into
-// three columns: cards · details · activity and Health.
+// View A, Live: the coordinator strip and one card or line per observed
+// subagent, in spawn order, with state filters, a compact Health strip and the
+// recent activity. Pressing any line of an agent's card opens its details: in
+// place under its card (medium), in the detail column (wide), or instead of the
+// list (compact). The desktop draws the full cards at every width, the narrow
+// dock (below 56 columns) included, their lines reflowed onto more rows; only
+// the terminal's compact pane draws one line per agent. From 140 columns
+// (expanded) the view reorganises into three columns: cards · details ·
+// activity and Health.
 
 import type { AgentRecord, LiveFilter } from '../../types'
 import { agentRecord } from '../lib/outcome'
@@ -56,7 +56,7 @@ function Filters(ctx: ViewContext, agents: readonly AgentRecord[]) {
   )
 }
 
-/** The compact layout has no KPI tiles, so a screen with ≈$ on it says here what ≈$ is (O1). */
+/** The compact layout has no KPI tiles, so a screen with ≈$ on it says here what ≈$ is. */
 function CostNote(ctx: ViewContext, analyses: Analyses) {
   const { Text } = ctx.els
   if (ctx.ui.showCost !== true) return null
@@ -68,7 +68,7 @@ function CostNote(ctx: ViewContext, analyses: Analyses) {
   )
 }
 
-/** The newest events, newest first, as aligned timeline rows in a sunken glass panel (a supporting list, §6). */
+/** The newest events, newest first, as aligned timeline rows in a sunken glass panel (a supporting list). */
 function RecentActivity(ctx: ViewContext) {
   const { Box, Text } = ctx.els
   const events = ctx.snapshot.events.slice(-RECENT_EVENTS).reverse()
@@ -108,7 +108,7 @@ function visible(ctx: ViewContext, agents: readonly AgentRecord[]): AgentRecord[
   return agents.filter(a => liveMatches(a, filter) || a.id === ctx.ui.focus)
 }
 
-/** Glass panels in the details: on the medium and wide panes; compact draws plain lines (no tiles, §10). */
+/** Glass panels in the details: on the medium and wide panes; compact draws plain lines (no tiles). */
 function panels(ctx: ViewContext): boolean {
   return ctx.layout !== 'compact'
 }
@@ -140,7 +140,7 @@ function AgentList(ctx: ViewContext, analyses: Analyses, agents: readonly AgentR
     )
   }
   const head = agents.slice(0, Math.min(cards, agents.length))
-  // The tiles stand a line apart (§6); the one-line rows after them stay packed.
+  // The tiles stand a line apart; the one-line rows after them stay packed.
   const grid =
     head.length > 0 ? (
       opts.columns > 1 ? (

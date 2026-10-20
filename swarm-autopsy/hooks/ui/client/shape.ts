@@ -1,4 +1,4 @@
-// The plain data a Client's tree is made of (THEME-PLAN §4B), and the desktop page's bounds on it. Shared by the hooks
+// The plain data a Client's tree is made of, and the desktop page's bounds on it. Shared by the hooks
 // module (which builds and measures the Live view's tree) and the surface modules (which draw it). Pure.
 
 /** One node of a Client's tree as plain data: a string, or an element with primitive props and children. */

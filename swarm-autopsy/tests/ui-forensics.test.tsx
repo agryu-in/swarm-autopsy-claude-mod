@@ -1,10 +1,9 @@
-// Forensics (Sunset Glass Workstream 2; DESIGN-CONTRACT §8.5): the timeline,
-// its filters and rows, the shared timeline row, and the agent Select past 63
-// agents. Split from ui-collisions-forensics.test.tsx with no assertion changed.
-// The whole pane is mounted through the engine's test host with a SIMULATED
-// snapshot seeded through `state.get` (as the acceptance suite does), and read as
-// logical lines; a few wiring checks call a view directly with plain-data
-// stand-ins for the elements.
+// Forensics: the timeline, its filters and rows, the shared timeline row, and
+// the agent Select past 63 agents. Split from ui-collisions-forensics.test.tsx
+// with no assertion changed. The whole pane is mounted through the engine's
+// test host with a SIMULATED snapshot seeded through `state.get` (as the
+// acceptance suite does), and read as logical lines; a few wiring checks call a
+// view directly with plain-data stand-ins for the elements.
 
 import type { On } from 'claude-code'
 import { describe, expect, mock, test, type Engine } from 'claude-code/testing'
@@ -284,7 +283,7 @@ describe('event line', () => {
   })
 })
 
-// ── Sunset Glass: the timeline on glass (direct calls, both surfaces) ──
+// ── the timeline on glass (direct calls, both surfaces) ──
 
 type Drawn = { type: string; props: Record<string, unknown> }
 
@@ -344,7 +343,7 @@ function viewContext(snapshot: Snapshot, surface: 'terminal' | 'desktop', width:
 const signalsOf = (snapshot: Snapshot): SignalRef[] =>
   analyzeCollisions(snapshot).signals.map(s => ({ id: s.id, title: s.title, eventIds: s.eventIds, level: s.severity }))
 
-describe('forensics: Sunset Glass', () => {
+describe('forensics: glass', () => {
   test('desktop: the timeline is one glass panel of aligned rows; ▲ sits in a fixed cell and the selected row is lit', () => {
     const seed = collidingSession()
     const signals = signalsOf(seed)

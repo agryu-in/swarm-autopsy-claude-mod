@@ -1,4 +1,4 @@
-// F3 spend vs outcome: classification over the contribution trail and the
+// Spend vs outcome: classification over the contribution trail and the
 // usage buckets. SIMULATED data only: snapshots come from the observation
 // fixtures, ledger views are built by hand to the contract type.
 
@@ -69,12 +69,12 @@ function spendOf(snapshot: Snapshot, rows: LedgerRow[] = [], session?: TokenCoun
   return { trail, outcome: buildSpendOutcome(snapshot, trail, ledgerOf(rows, session)) }
 }
 
-/** The snapshot with F2's own ledger folded from these turn.step records (SIMULATED). */
+/** The snapshot with the token ledger folded from these turn.step records (SIMULATED). */
 function withUsage(snapshot: Snapshot, records: readonly UsageRecord[]): Snapshot {
   return { ...snapshot, ledger: records.reduce((ledger, record) => applyUsage(ledger, record), snapshot.ledger) }
 }
 
-/** Trail, F2's real ledger view and the outcome over them, as the pane builds them. */
+/** Trail, the real ledger view and the outcome over them, as the pane builds them. */
 function spendFromLedger(snapshot: Snapshot, showCost = true): { trail: Trail; view: LedgerView; outcome: SpendOutcome } {
   const trail = buildTrail(snapshot)
   const view = buildLedgerView(snapshot.ledger, snapshot, { showCost })
@@ -316,7 +316,7 @@ describe('spend vs outcome: changes', () => {
     expect(agentOf(outcome, 'fixer')?.contributions.find(c => c.title.includes('alpha.ts'))?.category).toBe('verified')
   })
 
-  // Shape from the live run live-test/runs/20261017T155333Z (SIMULATED here): B's own piped check is
+  // Shape from a recorded live run (SIMULATED here): B's own piped check is
   // inconclusive, F's later whole-suite run passes and the trail links it to B's change.
   test("an agent's own inconclusive check is folded into its change that a later passing whole-suite run verifies", () => {
     const base = build(
@@ -630,7 +630,7 @@ describe('spend vs outcome: buckets', () => {
     expect(bucketSum(outcome)).toBe(outcome.denominator)
   })
 
-  test("bucket totals equal F2's session total for a ledger built from turn.step records", () => {
+  test("bucket totals equal the ledger's session total for a ledger built from turn.step records", () => {
     const base = build(...threeAgentSession(), spawn('idle'))
     const snapshot = withUsage(base, [
       usageRecord({ agentId: 'main', index: 0 }),
@@ -719,7 +719,7 @@ function draw(tree: unknown): { text: string; buttons: Drawn[] } {
 const keyOf = (button: Drawn) => button.props?.key ?? button.key
 const press = (button: Drawn | undefined) => (button?.props?.onPress as (() => void) | undefined)?.()
 
-// UI section, revised for the visual redesign (DESIGN-CONTRACT §8.6): one selectable row per bucket (`bk:`), whose agents
+// UI section: one selectable row per bucket (`bk:`), whose agents
 // focus pane-wide (`ui.focus`); the outcome detail lists contributions with their evidence; the usage record (attribution
 // and requests) is drawn once, by the ledger detail.
 describe('spend vs outcome: panel', () => {

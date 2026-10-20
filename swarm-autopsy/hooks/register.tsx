@@ -44,7 +44,7 @@ const PANE_ID = 'swarm-autopsy'
 const TITLE = 'Swarm Autopsy'
 const TICK_MS = 250
 /** The snapshot reaches `$.state` at most this often while it keeps changing: each write redraws the pane, and on
- * desktop a redraw re-mints every press handle, so a click racing it is lost (DESIGN-CONTRACT §7.6). */
+ * desktop a redraw re-mints every press handle, so a click racing it is lost. */
 const FLUSH_MS = 1000
 /** The terminal dock width asked for when the person wants a wider pane: a request it may not grant. The desktop app
  * sizes its dock itself, so the button is drawn only on the terminal (common.tsx sizesPaneOnRequest). */
@@ -99,15 +99,15 @@ type Prices = { table?: PriceTable; path?: string; error?: string }
 let prices: Prices = {}
 
 /** The version 2 shape: the same snapshot without the usage ledger. */
-type SnapshotV2 = Omit<Snapshot, 'version' | 'ledger' | 'compactionMarks' | 'instruments'> & {
+type SnapshotBeforeLedger = Omit<Snapshot, 'version' | 'ledger' | 'compactionMarks' | 'instruments'> & {
   version: 2
   instruments: Omit<Snapshot['instruments'], 'step'>
 }
 
 /** A stored value is reused only when it is this contract's shape (or the one before it) and this session's. */
-function isCurrent(value: unknown, sessionId: string | undefined): value is Snapshot | SnapshotV2 {
+function isCurrent(value: unknown, sessionId: string | undefined): value is Snapshot | SnapshotBeforeLedger {
   if (typeof value !== 'object' || value === null) return false
-  const v = value as Partial<Snapshot> | Partial<SnapshotV2>
+  const v = value as Partial<Snapshot> | Partial<SnapshotBeforeLedger>
   return (
     (v.version === 3 || v.version === 2) &&
     v.sessionId !== undefined &&
@@ -120,7 +120,7 @@ function isCurrent(value: unknown, sessionId: string | undefined): value is Snap
 }
 
 /** A version 2 snapshot kept across a reload gains an empty ledger, and says usage starts now. */
-function upgrade(stored: Snapshot | SnapshotV2, at: number): Snapshot {
+function upgrade(stored: Snapshot | SnapshotBeforeLedger, at: number): Snapshot {
   if (stored.version === 3) return stored
   const since = { at, missedEarlier: true, basis: 'the mod was reloaded over a snapshot that predates the usage ledger' }
   return reduce(
@@ -405,7 +405,8 @@ async function syncMusic($: EngineInterface): Promise<void> {
   try {
     const ui = await read($, uiAtom)
     const track = currentScene(cleanMood(ui.mood)).music
-    const { sound, player } = await musicTick($, musicMe, track)
+    const isListening = (await $.ui.panes()).some(pane => pane.id === PANE_ID && pane.isPlaced)
+    const { sound, player } = await musicTick($, musicMe, track, isListening)
     if (JSON.stringify(ui.sound) !== JSON.stringify(sound) || JSON.stringify(ui.player) !== JSON.stringify(player)) {
       await update($, uiAtom, now => ({ ...now, sound, player }))
     }
@@ -526,6 +527,9 @@ export const register: Register = on => {
     const ended = await next(e)
     if (e.reason === 'clear' || e.reason === 'resume') {
       resetSession(await $.clock.now().catch(() => 0))
+      // The process goes on under a new session id, and no session.start follows: the music's tick starts again here.
+      musicMe = (await $.session.id().catch(() => undefined)) ?? 'chat'
+      musicTimer = $.clock.every(MUSIC_TICK_MS, () => void syncMusic($))
       await flush($)
     }
     return ended

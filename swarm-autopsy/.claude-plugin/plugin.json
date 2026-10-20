@@ -1,6 +1,6 @@
 {
   "name": "swarm-autopsy",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A live forensic pane for multi-agent Claude Code sessions: what every subagent was asked, did and cost, how their work connects, where they collided, over a still, animated Spooky or Cozy scene with lofi music and liquid glass.",
   "author": {
     "name": "agryu-in"

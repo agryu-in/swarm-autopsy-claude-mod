@@ -1,6 +1,6 @@
-// Token arithmetic every vNext module shares (F2 ledger, F1 context, F3
-// spend vs outcome). Lead-owned contract helpers: pure, no rounding, and
-// never a context-window percentage on their own.
+// Token arithmetic the token features share (the ledger, the context gauge
+// and spend vs outcome). Shared helpers: pure, no rounding, and never a
+// context-window percentage on their own.
 
 import type { CostEstimate, TokenCounts } from '../../types'
 

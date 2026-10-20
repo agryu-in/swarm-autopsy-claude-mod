@@ -1,9 +1,9 @@
-// Sunset Glass · the lead's foundation (docs/sunset-glass/DESIGN-CONTRACT.md
-// §3–§9, §12). Tokens, rounding, the one unresolved count, the surface-aware
-// primitives (glass, bars, press rows, timeline cells) and the pane shell
-// (backdrop, title, tabs, KPI tiles). Kit pieces are called with a stub context;
-// the shell is mounted through the engine's own test host with a SIMULATED
-// snapshot seeded through `state.get`. No live session, model or network.
+// The UI foundation. Tokens, rounding, the one unresolved count, the
+// surface-aware primitives (glass, bars, press rows, timeline cells) and the
+// pane shell (backdrop, title, tabs, KPI tiles). Kit pieces are called with a
+// stub context; the shell is mounted through the engine's own test host with a
+// SIMULATED snapshot seeded through `state.get`. No live session, model or
+// network.
 
 import type { On } from 'claude-code'
 import { describe, expect, mock, test, type Engine } from 'claude-code/testing'
@@ -32,7 +32,7 @@ const NOW = 1_100_000
 const OPUS = 'claude-opus-5-5'
 const SLOW = { timeoutMs: 120_000 }
 const TABS = ['live', 'trail', 'collisions', 'forensics', 'spend', 'health'] as const
-/** Colours the terminal cannot paint as written: alpha hex and functional notations (R1 §2.4). */
+/** Colours the terminal cannot paint as written: alpha hex and functional notations. */
 const ALPHA_COLOUR = /#[0-9a-f]{8}\b|#[0-9a-f]{4}\b|rgba?\(|hsla?\(/i
 
 // ── reading trees ──
@@ -167,7 +167,7 @@ async function lines(ui: Ui): Promise<string[]> {
 
 // ── tokens and rounding ──
 
-describe('Sunset Glass tokens', () => {
+describe('design tokens', () => {
   test('pct rounds to one decimal first, then picks the format', () => {
     expect(pct(9.96)).toBe('10%')
     expect(pct(9.99)).toBe('10%')
@@ -221,7 +221,7 @@ describe('Sunset Glass tokens', () => {
 
 // ── the one unresolved count ──
 
-describe('one unresolved count (SG-U)', () => {
+describe('one unresolved count', () => {
   test('unresolvedOf keeps the findings at level unresolved, never a value-only entry', () => {
     const signal = (id: string, level: HealthSignal['level']): HealthSignal => ({
       id,
@@ -328,7 +328,7 @@ describe('bars that never wrap', () => {
   })
 })
 
-describe('press rows (the whole-card press, §9)', () => {
+describe('press rows (the whole-card press)', () => {
   function row(surface: 'terminal' | 'desktop') {
     const ctx = stub(surface)
     const { Text } = ctx.els
@@ -349,7 +349,7 @@ describe('press rows (the whole-card press, §9)', () => {
     return { drawn, presses: () => pressed }
   }
 
-  test('terminal: one plain Button holding the styled runs, the lead included', () => {
+  test('terminal: one plain Button holding the styled runs, the `lead` included', () => {
     const { drawn, presses } = row('terminal')
     const button = all(drawn).find(el => el.type === 'Button')
     expect(button?.props?.key).toBe('cardrow-a-2')
@@ -373,7 +373,7 @@ describe('press rows (the whole-card press, §9)', () => {
   })
 })
 
-describe('timeline rows align on desktop (§8)', () => {
+describe('timeline rows align on desktop', () => {
   const event = (seq: number, summary: string): ForensicEvent =>
     ({
       id: `e${seq}`,

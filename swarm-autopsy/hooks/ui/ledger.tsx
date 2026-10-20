@@ -1,15 +1,15 @@
-// F2 · the ledger on the Spend tab: the session block (total processed, token
+// The token ledger on the Spend tab: the session block (total processed, token
 // categories, requests, the cost toggle and, with cost on, the dated ≈$
 // estimate beside Claude Code's own figure), the ledger table and its notes.
 // Token counts are OBSERVED; ≈$ figures are API-equivalent estimates, never a
 // charge, and are drawn only through CostText.
 //
-// Sunset Glass (§11 "Spend"): the session block is the hero, a raised glass tile
-// from the medium layout up (plain lines when compact). On the desktop it holds
-// the big total, the categories as a Box bar, the legend as pills with exact
-// counts, and with cost on two sub-tiles: the ≈$ estimate (amber edge) and
-// Claude Code's own figure, apart. The terminal keeps today's lines inside its
-// round border. Expanded (≥ 140 columns) the hero sits beside the table.
+// The session block is the hero, a raised glass tile from the medium layout up
+// (plain lines when compact). On the desktop it holds the big total, the
+// categories as a Box bar, the legend as pills with exact counts, and with cost
+// on two sub-tiles: the ≈$ estimate (amber edge) and Claude Code's own figure,
+// apart. The terminal keeps today's lines inside its round border. Expanded (≥
+// 140 columns) the hero sits beside the table.
 
 import type { CostEstimate, LedgerTotals, LedgerView } from '../../types'
 import { compact, exact, plural } from '../lib/format'
@@ -26,7 +26,7 @@ export type { LedgerLinks } from './spend-common'
 /**
  * One short card line, e.g. "in 1.2M · cache 980k/41k · out 12k · 14 req"; the caller tags it OBSERVED when
  * `totals.requests > 0`. No request at all reads as nothing recorded, and requests that all came back without usage as
- * unknown (the caller tags that ∅), never as zero tokens observed (O5). It never carries ≈$: `showCost` is kept for the
+ * unknown (the caller tags that ∅), never as zero tokens observed. It never carries ≈$: `showCost` is kept for the
  * signature, and a caller draws the estimate through `CostText`, the only ≈$ drawer.
  */
 export function tokenSummary(totals: LedgerTotals | undefined, _showCost: boolean): string {
@@ -176,7 +176,7 @@ function CostLines(ctx: ViewContext, view: LedgerView, cost: CostEstimate) {
 }
 
 /**
- * The desktop's cost sub-tiles (§11 "Spend"): the ≈$ estimate in its own amber-edged tile, dated, API-equivalent and
+ * The desktop's cost sub-tiles: the ≈$ estimate in its own amber-edged tile, dated, API-equivalent and
  * not a charge; Claude Code's own figure in a separate tile, never added to it; side by side when there is room.
  */
 function CostTiles(ctx: ViewContext, view: LedgerView, cost: CostEstimate) {
@@ -244,7 +244,7 @@ function PriceBody(ctx: ViewContext, view: LedgerView) {
 }
 
 /**
- * The session hero (§11 "Spend"): a raised glass tile from the medium layout up (plain lines when compact) with the
+ * The session hero: a raised glass tile from the medium layout up (plain lines when compact) with the
  * total processed first, its categories and requests, the reading notes, the cost toggle and, with cost on, ≈$.
  */
 export function SessionBlock(ctx: ViewContext, view: LedgerView, showCost: boolean, readingNotes: readonly string[]) {
@@ -307,7 +307,7 @@ const HERO_MAX_CELLS = 48
 /**
  * The Spend tab's ledger: the session hero, the table (a row focuses its agent and opens its detail under it) and the
  * ledger's notes. Expanded (≥ 140 columns), the hero and the table sit side by side. With `links`, each row carries its
- * F3 bucket and the focused agent's outcome detail.
+ * outcome bucket and the focused agent's outcome detail.
  */
 export function LedgerPanel(ctx: ViewContext, view: LedgerView, showCost: boolean, links: LedgerLinks = {}) {
   const { Box } = ctx.els

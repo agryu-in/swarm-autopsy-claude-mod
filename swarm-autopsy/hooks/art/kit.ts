@@ -1,4 +1,4 @@
-// The art kit every scene of Swarm Autopsy is made with (ported from the meadow mod):
+// The art kit every scene of Swarm Autopsy is made with:
 // seeded randomness, unique ids, gradients, the looping effects (stars, rain, fog, clouds,
 // motes, flicker) and the spooky pieces (bats, crows, bare trees, headstones, wisps).
 // Pure: strings in, strings out; no script and no external reference in any output.
@@ -296,8 +296,6 @@ export function fadeToBase(uid: string, palette: Palette): { defs: string; body:
 const SERIF = "Georgia, 'DejaVu Serif', 'Nimbus Roman', serif"
 const SANS = "'DejaVu Sans', 'Liberation Sans', system-ui, sans-serif"
 
-export const FONTS = { serif: SERIF, sans: SANS }
-
 /** Title and motto at the top of a scene, with a soft shadow so any sky reads. */
 export function titleBlock(args: { uid: string; title: string; motto: string; palette: Palette; dark?: boolean }): { defs: string; body: string } {
   const ink = args.dark ? args.palette.base : args.palette.ink
@@ -329,12 +327,6 @@ export function gaugeCaption(args: { x: number; y: number; name: string; value: 
     `<text x="${n(args.x)}" y="${n(args.y + 13)}" font-size="11" font-weight="bold" fill="${args.palette.accent}">${esc(args.value)}</text>` +
     '</g>'
   )
-}
-
-/** A rectangle-ish window that glows and flickers. */
-export function glowWindow(r: () => number, x: number, y: number, w: number, h: number, color: string, frame?: string): string {
-  const edge = frame ? ` stroke="${frame}" stroke-width="0.8"` : ''
-  return `<rect x="${n(x)}" y="${n(y)}" width="${n(w)}" height="${n(h)}" rx="0.8" fill="${color}"${edge}>${flicker(r)}</rect>`
 }
 
 // ── Spooky pieces ────────────────────────────────────────────────────────────────────────

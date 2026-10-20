@@ -1,11 +1,11 @@
-// View F, Swarm Health (DESIGN-CONTRACT §8.7; Sunset Glass §11, §12): the
-// findings the existing analyses already raised (lib/signals), grouped by source,
-// each a card in its source's own level, with the level word beside its glyph,
-// its evidence label, its own words, its agents and events, and its evidence and
-// actions inside the card. Identical findings fold into one card that keeps every
-// entry's own actions. A value (main's context fill) is a quiet pill, never an
-// alarm card. No score, no threshold, no traffic light; colour only where an entry
-// exists. Also Live's Health strip. Workstream 3 owns this file.
+// View F, Swarm Health: the findings the existing analyses already raised
+// (lib/signals), grouped by source, each a card in its source's own level, with
+// the level word beside its glyph, its evidence label, its own words, its
+// agents and events, and its evidence and actions inside the card. Identical
+// findings fold into one card that keeps every entry's own actions. A value
+// (main's context fill) is a quiet pill, never an alarm card. No score, no
+// threshold, no traffic light; colour only where an entry exists. Also Live's
+// Health strip.
 
 import type { Evidence, HealthLevel, HealthSignal, HealthSource } from '../../types'
 import { EVIDENCE_COLOR, EVIDENCE_GLYPH, plural, truncate } from '../lib/format'
@@ -34,9 +34,9 @@ import type { Analyses } from './pane'
 const GROUPS: ReadonlyArray<{ source: HealthSource; title: string; from: string; elsewhere: string }> = [
   { source: 'trail', title: 'Trail flags', from: 'a trail flag', elsewhere: 'the Trail shows every flag on its node' },
   { source: 'collisions', title: 'Collision signals', from: 'a collision signal', elsewhere: 'the Collisions tab lists every signal' },
-  { source: 'context', title: 'Context', from: 'the captured context readings (F1)', elsewhere: "each agent's inspector on Live lists its context readings" },
-  { source: 'ledger', title: 'Token ledger', from: 'the token ledger (F2)', elsewhere: 'the Spend tab lists every ledger row and note' },
-  { source: 'outcome', title: 'Spend vs outcome', from: 'spend vs outcome (F3)', elsewhere: "the Spend tab lists every agent's outcome" },
+  { source: 'context', title: 'Context', from: 'the captured context readings', elsewhere: "each agent's inspector on Live lists its context readings" },
+  { source: 'ledger', title: 'Token ledger', from: 'the token ledger', elsewhere: 'the Spend tab lists every ledger row and note' },
+  { source: 'outcome', title: 'Spend vs outcome', from: 'spend vs outcome', elsewhere: "the Spend tab lists every agent's outcome" },
   { source: 'coverage', title: 'Coverage gaps', from: 'what the collector could not capture', elsewhere: 'the footer lists every warning' },
 ]
 
@@ -416,8 +416,8 @@ function StripLine(ctx: ViewContext, members: readonly Member[], width: number) 
   const signal = first.signal
   const ids = [...new Set(members.flatMap(m => m.signal.agentIds))]
   const prefix = headPrefix(signal.level, signal.evidence, signal.title).length
-  // The terminal cuts the title to its exact cells. Desktop text is proportional (about 0.78 cell a character, R1
-  // §5.2), and its renderer wraps a styled run nested in a truncating Text anyway (seen in the harness: nested runs
+  // The terminal cuts the title to its exact cells. Desktop text is proportional (about 0.78 cell a character),
+  // and its renderer wraps a styled run nested in a truncating Text anyway (seen in the harness: nested runs
   // get `white-space:pre-wrap`), so there the whole title wraps inside its own shrinking Box beside the chips.
   const desktop = paintsGlass(ctx)
   const fit = (cells: number) => (desktop ? signal.title : truncate(signal.title, Math.max(1, cells)))
@@ -456,7 +456,7 @@ function StripLine(ctx: ViewContext, members: readonly Member[], width: number) 
 /**
  * Live's Health strip: the first findings of the Health tab, identical titles folded into one line with all their
  * agents (the first three findings are always among them), and the way to the tab. A sunken glass panel from medium
- * up. Drawn by Live (Workstream 1 places it); its look belongs to Health (Workstream 3). Signature frozen.
+ * up. Drawn by Live; its look belongs to Health.
  */
 export function HealthStrip(ctx: ViewContext, analyses: Analyses) {
   const { Box, Button, Text } = ctx.els
@@ -471,7 +471,7 @@ export function HealthStrip(ctx: ViewContext, analyses: Analyses) {
   // where a compact dock keeps its rows.
   const framed = paintsGlass(ctx) || ctx.layout !== 'compact'
   const inner = ctx.width - (framed ? CARD_FRAME : 0)
-  // The Health mark is rose (secondary chrome, §4.1), so the strip reads apart from Live's own sections.
+  // The Health mark is rose (secondary chrome), so the strip reads apart from Live's own sections.
   const heading = (
     <Text wrap="truncate-end">
       <Text color={ROLE.rose}>▌</Text>

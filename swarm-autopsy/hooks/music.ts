@@ -1,4 +1,4 @@
-// The scenes' music (ported from the meadow mod): one looping track per scene, played by one chat at a time.
+// The scenes' music: one looping track per scene, played by one chat at a time, and only by a chat whose pane is open.
 // Play/pause and the volume live in the mod's store, so every chat agrees; the chat named as owner plays and renews a
 // heartbeat, and when it closes or goes quiet another chat takes over (lib/music.ts `decide`). On Linux the player is
 // `paplay` through PulseAudio (its volume moved live with `pactl`), on macOS the engine's own `$.audio.play`.
@@ -73,6 +73,8 @@ function startPaplay($: $, track: string, step: number): Playing {
     let failures = 0
     while (!state.isStopped) {
       const startedAt = await $.clock.now()
+      // A stop that lands while the clock is read must not start a player nothing can stop.
+      if (state.isStopped) break
       // Each pass plays the track once at the volume the handle holds now; the loop repeats it.
       stream = $.process.spawn({
         argv: ['paplay', `--volume=${Math.round(65536 * volumeOf(handle.volume))}`, `--client-name=${MUSIC_CLIENT}`, '--stream-name=swarm-autopsy', path],
@@ -140,14 +142,20 @@ function ensureStopped(): void {
 }
 
 /**
- * One look at the store and the player: plays the scene's `track` here when this chat owns the music, stops it when
- * not, keeps the heartbeat. Resolves what the toolbar shows: the shared sound and where this chat stands.
+ * One look at the store and the player: plays the scene's `track` here when this chat owns the music and its pane is
+ * open (`isListening`), stops it when not, keeps the heartbeat. Resolves what the toolbar shows: the shared sound and
+ * where this chat stands.
  */
-export async function musicTick($: $, me: string, track: string | undefined): Promise<{ sound: SoundValue; player: PlayerValue }> {
+export async function musicTick(
+  $: $,
+  me: string,
+  track: string | undefined,
+  isListening: boolean,
+): Promise<{ sound: SoundValue; player: PlayerValue }> {
   const sound = cleanSound(await $.store.get(MUSIC_KEYS.sound))
   const owner = cleanOwner(await $.store.get(MUSIC_KEYS.owner))
   const now = await $.clock.now()
-  const decision = decide({ me, now, sound, owner, hasTrack: track !== undefined, canPlay: backend !== 'none' })
+  const decision = decide({ me, now, sound, owner, hasTrack: track !== undefined, canPlay: backend !== 'none', isListening })
   if (decision.owner === 'claim' || (decision.owner === 'beat' && now - lastBeat >= BEAT_MS)) {
     lastBeat = now
     await $.store.set(MUSIC_KEYS.owner, { session: me, beatAt: now })

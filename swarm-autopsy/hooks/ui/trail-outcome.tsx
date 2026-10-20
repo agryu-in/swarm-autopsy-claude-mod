@@ -1,10 +1,10 @@
-// The Trail's "Outcome so far" box (Workstream C; Sunset Glass WS2): a glass
-// summary of agents by state, files changed and the one unresolved count; each
-// verification command with its latest verdict (the command cut in the middle,
-// so two commands stay apart); the command-level flags; and F3's spend vs
-// outcome as the shared bucket bar, one row per bucket, every number tagged,
-// the denominator's basis one press away (fixes O2). Desktop: count pills and
-// aligned Box columns; the terminal keeps its compact lines.
+// The Trail's "Outcome so far" box: a glass summary of agents by state, files
+// changed and the one unresolved count; each verification command with its
+// latest verdict (the command cut in the middle, so two commands stay apart);
+// the command-level flags; and spend vs outcome as the shared bucket bar, one
+// row per bucket, every number tagged, the denominator's basis one press away.
+// Desktop: count pills and aligned Box columns; the terminal keeps its compact
+// lines.
 
 import type { HealthSignal, SpendBucket, SpendOutcome, VerificationVerdict } from '../../types'
 import { VERDICT_COLOR, VERDICT_GLYPH, compact, displayPath, pct, plural, subagents } from '../lib/format'
@@ -42,7 +42,7 @@ export function FlagLine(ctx: ViewContext, flag: TrailFlag) {
   )
 }
 
-/** Subagents by state, from the snapshot's own agent list (Sunset Glass §12: every drawn state count uses it). */
+/** Subagents by state, from the snapshot's own agent list (every drawn state count uses it). */
 function agentsByState(ctx: ViewContext): { total: number; words: string } {
   const agents = subagents(ctx.snapshot)
   const words = STATES.map(state => [state, agents.filter(a => a.state === state).length] as const)
@@ -53,7 +53,7 @@ function agentsByState(ctx: ViewContext): { total: number; words: string } {
 }
 
 /**
- * Agents by state, files changed and the one unresolved count (Sunset Glass SG-U): the findings Health marks `?`, so
+ * Agents by state, files changed and the one unresolved count: the findings Health marks `?`, so
  * this box, the header and the Health tab always say the same number. Desktop: three pills; terminal: one line.
  */
 function Summary(ctx: ViewContext, trail: Trail, health: readonly HealthSignal[]) {
@@ -226,7 +226,7 @@ function BucketChips(ctx: ViewContext, bucket: SpendBucket) {
   ]
 }
 
-/** The swatch and the bucket's words; "verified" is at best ◇ INFERRED (F3-4), so its label says so beside any ●. */
+/** The swatch and the bucket's words; "verified" is at best ◇ INFERRED, so its label says so beside any ●. */
 function BucketName(ctx: ViewContext, bucket: SpendBucket) {
   const { Text } = ctx.els
   const verified = bucket.bucket === 'verified'
@@ -284,7 +284,7 @@ function BucketCells(ctx: ViewContext, bucket: SpendBucket, labelCols: number, f
   )
 }
 
-/** F3 spend vs outcome: the shared bucket bar, one row per bucket, the denominator and its basis, and the way to Spend. */
+/** Spend vs outcome: the shared bucket bar, one row per bucket, the denominator and its basis, and the way to Spend. */
 function SpendBar(ctx: ViewContext, spend: SpendOutcome, inner: number) {
   const { Box, Button, Text } = ctx.els
   const measured = spend.denominator > 0

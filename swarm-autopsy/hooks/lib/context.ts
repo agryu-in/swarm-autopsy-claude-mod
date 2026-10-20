@@ -1,6 +1,6 @@
-// F1 · per-agent context observation (contract definition 5). Pure and
+// The context gauge: per-agent context observation. Pure and
 // immutable; no `$`, no model calls. Usage comes only from the agent's ledger
-// (F2's AgentLedger); a % appears only against an observed window (the main
+// (the token ledger's AgentLedger); a % appears only against an observed window (the main
 // loop's session.measure) or under a stated same-model assumption.
 
 import type { AgentContextView, AgentLedger, CompactionMark, Snapshot, TokenCounts, UsageRecord } from '../../types'
@@ -10,7 +10,7 @@ import { CONTEXT_STOP_REASONS, promptTokensOf } from './tokens'
 export type ContextInputs = {
   agentId: string
   isMain: boolean
-  /** F2's stored per-agent ledger (history, latest, stopReasons). */
+  /** The token ledger's stored entry for this agent (history, latest, stopReasons). */
   ledger: AgentLedger | undefined
   /** This agent's compaction marks. */
   compactions: readonly CompactionMark[]

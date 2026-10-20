@@ -1,9 +1,9 @@
-// Shared test helpers for the visual redesign (lead-owned). No `$`, no engine:
-// no-op view actions for stub contexts, and a flattening of a drawn tree into
-// logical lines (a Text, a Button, or a row Box's children joined), which is
-// what the pane-wide acceptance scans read. A logical line is not a painted
-// line: a long Text may wrap on screen, but its labels and numbers stay on the
-// same logical line, which is the scope of DESIGN-CONTRACT §4.1.
+// Shared test helpers for the views. No `$`, no engine: no-op view actions for
+// stub contexts, and a flattening of a drawn tree into logical lines (a Text, a
+// Button, or a row Box's children joined), which is what the pane-wide
+// acceptance scans read. A logical line is not a painted line: a long Text may
+// wrap on screen, but its labels and numbers stay on the same logical line,
+// which is the scope the measure-label rule checks.
 
 import type { Actions } from '../hooks/ui/common'
 
@@ -48,7 +48,7 @@ function kids(node: Exclude<DrawnNode, string | number | boolean | null | undefi
 export function inline(node: DrawnNode): string {
   if (node === null || node === undefined || typeof node === 'boolean') return ''
   if (typeof node === 'string' || typeof node === 'number') return String(node)
-  // A decorative Svg (empty alt, like an HTML img with alt="") draws no information: the Sunset Glass backdrop.
+  // A decorative Svg (empty alt, like an HTML img with alt="") draws no information: the scene backdrop.
   if (node.type === 'Svg') return node.props?.alt === '' ? '' : `[svg: ${String(node.props?.alt ?? '')}]`
   if (node.type === 'Button') {
     const body = kids(node).map(inline).join('')
@@ -77,7 +77,7 @@ export function logicalLines(node: DrawnNode): string[] {
   return children.flatMap(logicalLines)
 }
 
-// ── drawings with Clients (THEME-PLAN §4B: the desktop Live tab is drawn by two Clients) ──
+// ── drawings with Clients (the desktop Live tab is drawn by two Clients) ──
 
 type Query = { key?: string; type?: string; text?: string | RegExp; in?: string }
 /** The part of a mounted drawing these helpers use. */

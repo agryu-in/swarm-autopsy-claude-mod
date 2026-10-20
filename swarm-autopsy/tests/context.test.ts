@@ -1,6 +1,6 @@
-// F1 context view tests. SIMULATED data only: AgentLedger values are built by
-// hand from `usageRecord` (F2's reducer is not used here), and no live session,
-// model or network is involved.
+// Context gauge view tests. SIMULATED data only: AgentLedger values are built
+// by hand from `usageRecord` (the ledger's reducer is not used here), and no
+// live session, model or network is involved.
 
 import { describe, expect, test } from 'claude-code/testing'
 
@@ -41,7 +41,7 @@ function tally(previous: ModelTally | undefined, t: TokenCounts): ModelTally {
   }
 }
 
-/** An agent's ledger as F2 would store it; `historyCap` keeps only the newest records, as the bound does. */
+/** An agent's ledger as the ledger stores it; `historyCap` keeps only the newest records, as the bound does. */
 function agentLedger(records: readonly UsageRecord[], options: { agentId?: string; historyCap?: number } = {}): AgentLedger {
   const agentId = options.agentId ?? records[0]?.agentId ?? 'main'
   const ordered = [...records].sort(byTime)
@@ -286,7 +286,7 @@ describe('buildContextView: subagent estimate', () => {
     }
   })
 
-  test('a main window read while main used another model is not assumed; the documented window is used instead (D4)', () => {
+  test('a main window read while main used another model is not assumed; the documented window is used instead', () => {
     const view = buildContextView(
       sub({ ledger: agentLedger(records), main: MAIN_READING, mainRequestedModel: OPUS_1M, mainModelAtWindow: 'claude-sonnet-5-5' }),
     )

@@ -4,8 +4,12 @@
 
 import type { VerificationKind } from '../../types'
 
-// A heredoc's body, from `<<EOF` (or <<-'EOF', <<"EOF") to its closing word.
-const HEREDOC = /<<-?\s*(['"]?)(\w+)\1[^\n]*\n[\s\S]*?\n\s*\2(?=\s|$)/g
+// A heredoc's opener (`<<EOF`, <<-'EOF', <<"EOF") and a line that can close one: its first word, alone or followed by
+// a space. Every scan below is one pass over the command, because a Bash command's text is not bounded.
+const HEREDOC_OPENER = /<<-?\s*(['"]?)(\w+)\1/
+const HEREDOC_CLOSER = /^\s*(\w+)(?=\s|$)/
+// A redirection such as `2>&1` or `&>>`. The lookbehind starts a digit run's match only at its first digit.
+const REDIRECTION = /(?<!\d)\d*>&\d*|&>>?/g
 const SEPARATORS = new Set(['||', '&&', '|', ';', '\n', '&'])
 const SPLIT = /(\|\||&&|\||;|\n|&)/
 
@@ -42,11 +46,86 @@ export type CommandSegment = {
 
 /** Blanks what is data, not command: heredoc bodies, quoted strings, `2>&1`-style redirections. */
 function blankData(command: string): string {
-  return command
-    .replace(HEREDOC, ' ')
-    .replace(/'[^']*'/g, "''")
-    .replace(/"(?:\\.|[^"\\])*"/g, '""')
-    .replace(/\d*>&\d*|&>>?/g, ' ')
+  return blankQuotes(blankHeredocs(command)).replace(REDIRECTION, ' ')
+}
+
+/**
+ * Each heredoc, from its `<<WORD` to the end of the first later line that closes it, becomes one space: the opener
+ * line's text before `<<` and the closing line's text after the word stay. An unclosed heredoc stays as it is.
+ */
+function blankHeredocs(command: string): string {
+  if (!command.includes('<<')) return command
+  const lines = command.split('\n')
+  const closersOf = new Map<string, number[]>()
+  lines.forEach((line, index) => {
+    const word = HEREDOC_CLOSER.exec(line)?.[1]
+    if (word === undefined) return
+    const known = closersOf.get(word)
+    if (known) known.push(index)
+    else closersOf.set(word, [index])
+  })
+  // Openers are met in line order, so each word's list is walked forward once.
+  const passed = new Map<string, number>()
+  const closerAfter = (word: string, index: number): number | undefined => {
+    const closers = closersOf.get(word) ?? []
+    let at = passed.get(word) ?? 0
+    while (at < closers.length && (closers[at] ?? Infinity) <= index) at += 1
+    passed.set(word, at)
+    return closers[at]
+  }
+  const kept: string[] = []
+  let index = 0
+  while (index < lines.length) {
+    const line = lines[index] ?? ''
+    const opener = HEREDOC_OPENER.exec(line)
+    const closer = opener ? closerAfter(opener[2] ?? '', index) : undefined
+    if (!opener || closer === undefined) {
+      kept.push(line)
+      index += 1
+      continue
+    }
+    kept.push(`${line.slice(0, opener.index)} ${(lines[closer] ?? '').replace(HEREDOC_CLOSER, '')}`)
+    index = closer + 1
+  }
+  return kept.join('\n')
+}
+
+/**
+ * Quoted strings emptied (`''`, `""`), read as the shell reads them: a backslash escapes the next character outside
+ * single quotes. An unclosed quote leaves the rest of the command as it is.
+ */
+function blankQuotes(command: string): string {
+  if (!/['"]/.test(command)) return command
+  let blanked = ''
+  let at = 0
+  while (at < command.length) {
+    const char = command[at]
+    if (char === '\\') {
+      blanked += command.slice(at, at + 2)
+      at += 2
+      continue
+    }
+    if (char !== "'" && char !== '"') {
+      blanked += char
+      at += 1
+      continue
+    }
+    const end = closingQuote(command, at)
+    if (end === undefined) return blanked + command.slice(at)
+    blanked += char + char
+    at = end + 1
+  }
+  return blanked
+}
+
+/** Where the quote opened at `start` closes, or undefined when it never does. */
+function closingQuote(command: string, start: number): number | undefined {
+  const quote = command[start]
+  for (let at = start + 1; at < command.length; at += 1) {
+    if (command[at] === quote) return at
+    if (quote === '"' && command[at] === '\\') at += 1
+  }
+  return undefined
 }
 
 function head(text: string): string {

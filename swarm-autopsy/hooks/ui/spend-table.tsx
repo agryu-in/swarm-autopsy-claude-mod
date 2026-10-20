@@ -1,11 +1,11 @@
-// F2 · the ledger table. Wide: every token category, total, requests, ≈$ (cost
-// on) and the F3 bucket, with the session total row first. Compact and medium:
+// The token ledger table. Wide: every token category, total, requests, ≈$ (cost
+// on) and the outcome bucket, with the session total row first. Compact and medium:
 // the agent's chip, its total and a mini token bar (its categories open with
 // the focused agent's detail). Rows are direct usage; an agent with
 // descendants gets a dim "spawn tree (overlaps)" line that is never added.
 //
 // The terminal draws each row as one padded monospaced line. The desktop draws
-// fixed-width Box cells (Sunset Glass §8, SG-6): the figure columns are
+// fixed-width Box cells: the figure columns are
 // right-aligned `mono` cells anchored to the table's right edge, so they line
 // up on every row whatever the proportional font does with the names; the
 // session row is highlighted, the bucket a pill, the spawn tree a muted pill.
@@ -259,7 +259,7 @@ function deskColumnsOf(ctx: ViewContext, shape: Shape): DeskColumns {
   const badge = shape.withBadge ? BADGE_CELLS : 0
   const cost = shape.costColumn
   if (shape.full) return { full: true, bar: false, cost, badge, fixed: LABEL_CELLS + NUMBER_CELLS + cost + badge }
-  // Compact: figures only (§10: no miniature charts there); medium adds the categories' mix as a Box bar.
+  // Compact: figures only (no miniature charts there); medium adds the categories' mix as a Box bar.
   const bar = ctx.layout === 'medium'
   return { full: false, bar, cost, badge, fixed: LABEL_CELLS + DESK_BRIEF_TOTAL_CELLS + (bar ? BRIEF_BAR_CELLS : 0) + DESK_BRIEF_REQ_CELLS + cost + badge }
 }
@@ -370,7 +370,7 @@ function FocusDetail(ctx: ViewContext, row: LedgerRow, showCost: boolean, links:
   const { Box } = ctx.els
   const agent = links.outcome?.agents.find(a => a.agentId === row.agentId)
   const outcome = (inner: ViewContext) => (links.trail ? AgentOutcomeDetail(inner, agent, links.trail) : null)
-  // Desktop: the selected detail sits in a sunken glass panel (the one panel-in-a-panel §6 allows).
+  // Desktop: the selected detail sits in a sunken glass panel (the one panel-in-a-panel allowed).
   const panel = paintsGlass(ctx) ? { ...glass(ctx, 'sunken'), paddingX: 1 } : {}
   const frame = paintsGlass(ctx) ? 4 : 0
   if (ctx.layout === 'wide') {

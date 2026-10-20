@@ -1,6 +1,6 @@
 # Swarm Autopsy · technical reference
 
-How Swarm Autopsy 1.0.0 works inside: what it listens to, what it keeps, every rule behind a label, how the pane is
+How Swarm Autopsy 1.0.1 works inside: what it listens to, what it keeps, every rule behind a label, how the pane is
 drawn, and what it stores. The [README](../README.md) is the place to start; this page is the detail behind it. Paths are
 relative to `swarm-autopsy/`.
 
@@ -576,9 +576,11 @@ references.
 - **Otherwise, on macOS:** the engine's `$.audio.play`, looping, at 1.4× the step's gain.
 - **Anywhere else:** once Play is pressed, the toolbar says why there is no audio (for example, that `paplay` is not
   installed).
-- **One chat plays at a time.** The owner is stored as `music-owner` in the mod's store. It renews a heartbeat every
-  3 s, and each chat checks every 1.5 s. A heartbeat older than 10 s lets another chat take over, and a chat that ends
-  releases the music.
+- **One chat plays at a time, and only one whose pane is open** (`$.ui.panes()` lists it as placed). The owner is
+  stored as `music-owner` in the mod's store. It renews a heartbeat every 3 s, and each chat checks every 1.5 s. A
+  heartbeat older than 10 s lets another chat with its pane open take over. A chat that ends, or closes its pane,
+  releases the music. A chat that never opens the pane (a `claude -p` run) never plays. After `/clear` the chat goes
+  on under its new session id.
 - **Volume** has five steps: 14%, 24%, 36%, 52% and 72% of full volume for `paplay` (default: step 2, 24%).
 
 ## What it stores, reads, writes and runs
@@ -610,8 +612,8 @@ It makes no network calls.
 
 ## Tests
 
-559 tests in 24 files, run in Claude Code's own test host (`claude plugin test ./swarm-autopsy`). On 2026-10-20 all 559
-passed on Claude Code 2.1.303.
+564 tests in 24 files, run in Claude Code's own test host (`claude plugin test ./swarm-autopsy`). On 2026-10-20 all 564
+passed on Claude Code 2.1.303 and on the desktop app's engine, 2.1.299.
 
 | Files | Cover |
 | --- | --- |
@@ -628,7 +630,7 @@ passed on Claude Code 2.1.303.
 
 ```text
 swarm-autopsy/
-├── .claude-plugin/plugin.json   the mod's manifest (name, version 1.0.0)
+├── .claude-plugin/plugin.json   the mod's manifest (name, version 1.0.1)
 ├── hooks/
 │   ├── hooks.json               names the one module
 │   ├── register.tsx             hooks, the command, the render hook, the ticks, the stored settings

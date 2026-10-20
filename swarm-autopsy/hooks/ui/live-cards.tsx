@@ -1,8 +1,8 @@
-// Live's agents at a glance (Sunset Glass DESIGN-CONTRACT §9, §11): the
-// coordinator strip, an agent card (a raised glass tile tinted with the agent's
-// identity) and the one-line row the terminal's compact layout draws instead.
+// Live's agents at a glance: the coordinator strip, an agent card (a raised
+// glass tile tinted with the agent's identity) and the one-line row the
+// terminal's compact layout draws instead.
 //
-// The whole card opens the agent's existing details (§9): every text line is a
+// The whole card opens the agent's existing details: every text line is a
 // press target calling `toggleFocus(id)`. The first line keeps `card-<id>`, the
 // others are `cardrow-<id>-<slot>` (never `card-`: the tests and the acceptance
 // walk count one `card-` key per agent), and a line's slot is fixed by what it
@@ -67,12 +67,12 @@ const RING_CELLS = 7
 const RING_MIN_HEAD = 36
 /** Desktop: rows a task may take on a card before the rest is cut. */
 const TASK_ROWS = 2
-/** Desktop text is proportional: a character takes about this much of a cell on average (R1 §5.2). */
+/** Desktop text is proportional: a character takes about this much of a cell on average. */
 const DESKTOP_CHAR = 0.85
 /**
  * Desktop: pad a line's label with figure spaces to the line's width (PressRow `fill`), so the press target spans the
  * line rather than the words alone. Off: the harness paint (2026-10-18, 116 columns) showed the padded labels ending
- * in a stray "…" and pushing the ring past the card's edge (§9 allows `fill` only without them).
+ * in a stray "…" and pushing the ring past the card's edge (`fill` is allowed only without them).
  */
 const DESKTOP_FILL = false
 /** From this width the coordinator strip lays its lines out in two columns. */
@@ -85,10 +85,10 @@ const LINE_METER_CELLS = 4
 /** A compact line's task, flattened to one line; the painter cuts it to the pane. */
 const TASK_MAX = 160
 
-/** Each line's slot on a card, fixed by what it says, so its key holds whatever the figures do (R3 §1.4). */
+/** Each line's slot on a card, fixed by what it says, so its key holds whatever the figures do. */
 const SLOT = { identity: 0, task: 1, figures: 2, tokens: 3, meta: 4, spark: 5, spawn: 6, counts: 7 } as const
 
-/** A card line's key: `card-<id>` for the first line, `cardrow-<id>-<slot>` for the rest (§9). */
+/** A card line's key: `card-<id>` for the first line, `cardrow-<id>-<slot>` for the rest. */
 export function lineKey(id: string, slot: number): string {
   return slot === SLOT.identity ? `card-${id}` : `cardrow-${id}-${slot}`
 }
@@ -127,7 +127,7 @@ function charsIn(ctx: ViewContext, cells: number): number {
   return Math.max(1, ctx.surface === 'terminal' ? Math.floor(cells) : Math.floor(cells / DESKTOP_CHAR))
 }
 
-/** Styled runs cut to `cells` with a dim ellipsis: the terminal wraps a Button's text whatever a Text says (R2 §4.4). */
+/** Styled runs cut to `cells` with a dim ellipsis: the terminal wraps a Button's text whatever a Text says. */
 function fit(ctx: ViewContext, node: RenderChildren, cells: number): RenderChildren[] {
   const { Text } = ctx.els
   const runs = textRuns(node)
@@ -233,7 +233,7 @@ export type LineParts = {
 
 type Press = { id: string; selected: boolean; onPress: () => void }
 
-/** The press of an agent's card: every line toggles its focus, which opens its existing details (§9). */
+/** The press of an agent's card: every line toggles its focus, which opens its existing details. */
 function pressOf(ctx: ViewContext, agent: AgentRecord): Press {
   return { id: agent.id, selected: ctx.ui.focus === agent.id, onPress: () => ctx.act.toggleFocus(agent.id) }
 }
@@ -353,7 +353,7 @@ function taskParts(ctx: ViewContext, agent: AgentRecord, cells: number): LinePar
   return { slot: SLOT.task, runs: <Text weight="medium">{quoted}</Text>, words: `“${agent.description}”`, rows: TASK_ROWS }
 }
 
-/** The tokens figure's words: `● 78k processed`, or `∅ usage unknown (why)` (O5: unknown is never a 0). */
+/** The tokens figure's words: `● 78k processed`, or `∅ usage unknown (why)` (unknown is never a 0). */
 function tokenWords(ctx: ViewContext, usage: Usage) {
   const { Text } = ctx.els
   if (!usage.known) {
@@ -600,7 +600,7 @@ function RingBeside(ctx: ViewContext, view: AgentContextView, inner: number, ide
 }
 
 /**
- * The card's tile (§6): raised glass tinted with `edge`; on desktop the focused card's edge is at full strength and the
+ * The card's tile: raised glass tinted with `edge`; on desktop the focused card's edge is at full strength and the
  * whole tile lights under the pointer. The terminal keeps a plain round border in `edge`.
  */
 function CardBox(ctx: ViewContext, id: string, edge: string, width: number, focused: boolean, children: RenderChildren) {
@@ -631,7 +631,7 @@ function besideRing(ctx: ViewContext, ring: RenderChildren, lines: RenderChildre
 }
 
 /**
- * An agent's card (§11): identity, type and state with the ring on the right (desktop), the task, one figures line
+ * An agent's card: identity, type and state with the ring on the right (desktop), the task, one figures line
  * (context gauge, tokens processed and their bar), a quiet line of activity and counts, and per-request prompt sizes.
  * A narrow card stacks the gauge and the tokens, lets the task take two rows and drops the ring when it would squeeze
  * the identity line.
@@ -654,7 +654,7 @@ export function AgentCard(ctx: ViewContext, analyses: Analyses, agent: AgentReco
 }
 
 /**
- * The coordinating session as a compact strip (§11): identity and state, its figures, its activity and counts, and its
+ * The coordinating session as a compact strip: identity and state, its figures, its activity and counts, and its
  * prompt sizes; from 100 columns in two columns of lines, the ring beside the gauge (desktop). Its spawn tree closes
  * the strip as a muted note, labelled as overlapping and never added.
  */

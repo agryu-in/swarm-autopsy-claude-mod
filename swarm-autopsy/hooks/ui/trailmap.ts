@@ -1,7 +1,7 @@
-// The contribution trail as desktop Svg (DESIGN-CONTRACT §2, §8.3; Sunset Glass
-// §11, SG-9). Pure: a layout and a string out. Two drawings, both in image mode
-// and sized by the pane (a viewBox about the pane's pixel width, no size of
-// their own, so the image fills its slot at a near 1:1 type size, R1 §6.3d):
+// The contribution trail as desktop Svg. Pure: a layout and a string out. Two
+// drawings, both in image mode and sized by the pane (a viewBox about the pane's
+// pixel width, no size of their own, so the image fills its slot at a near 1:1
+// type size):
 // - the map (wide panes): one identity-tinted band per agent, stages as columns,
 //   nodes as stage pills, evidence-coded edges (LINKED solid ◆, INFERRED dashed
 //   ◇) routed through the gutters between columns and the channels between
@@ -23,12 +23,12 @@ import type { Trail, TrailEdge, TrailLane, TrailNode } from '../lib/trail'
 import { svgEscape } from './svg'
 import { FLOW_OF, FLOW_STAGES, STAGE_GLYPH, STAGE_TITLE, badgeFor, isBackEdge, middleTruncate, pathOf } from './trail-model'
 
-/** The engine's own limit is 131,072 characters; ours leaves room (DESIGN-CONTRACT §2). */
+/** The engine's own limit is 131,072 characters; ours leaves room. */
 export const MAP_MAX_SOURCE = 60_000
 /** Past this many nodes the map is not built at all (the overview is drawn instead): its markup would not fit. */
 export const MAP_MAX_NODES = 160
 /**
- * Desktop pixels per body column. The harness measures 1ch at 7.91 px (R1 §5.2), so a drawing `columns × 8` wide fills
+ * Desktop pixels per body column. The harness measures 1ch at 7.91 px, so a drawing `columns × 8` wide fills
  * the map's glass panel at about 0.97 of its size: its type is drawn near 1:1.
  */
 export const CELL_PX = 8
@@ -125,7 +125,7 @@ const CORNER = 5
 const TITLE_MAX = 300
 /** Where a node's label starts: after the glyph's disc. */
 const LABEL_INSET = 25
-/** Labels may grow with the room an expanded pane gives (Sunset Glass §10). */
+/** Labels may grow with the room an expanded pane gives. */
 const LABEL_MAX = 40
 /** Characters a flagged node's label leaves for its `?`. */
 const FLAG_CHARS = 3
@@ -136,7 +136,7 @@ const EDGE_OFF = '0.3'
 
 export type MapInput = {
   widthPx: number
-  /** F3, for each lane's outcome badge; no badges without it. */
+  /** Spend vs outcome, for each lane's outcome badge; no badges without it. */
   spend?: SpendOutcome
   selectedNodeId?: string
   focusAgentId?: string
@@ -412,7 +412,7 @@ function laneLabel(snapshot: Snapshot, lane: MapLane, layout: MapLayout, focus: 
   return `${band}${chip}${type}${task}`
 }
 
-/** The lane's F3 bucket as a pill in the bucket's hue, its words on one line or two. */
+/** The lane's outcome bucket as a pill in the bucket's hue, its words on one line or two. */
 function outcomeBadge(spend: SpendOutcome | undefined, lane: MapLane, x: number, w: number, font: number): string {
   const badge = spend ? badgeFor(spend, lane.agentId) : undefined
   if (!badge) return ''

@@ -1,6 +1,6 @@
-// The Contribution Trail's view model (Workstream C): stage grouping, filter
+// The Contribution Trail's view model: stage grouping, filter
 // membership, the selected node's path, lane badges and text fitting. Pure: it
-// reads the Trail and F3's SpendOutcome as they are and decides nothing they do
+// reads the Trail and the SpendOutcome as they are and decides nothing they do
 // not already say. No edge is made here; every mark points at a trail edge.
 
 import type { AgentOutcome, ContributionOutcome, Evidence, SpendBucket, SpendOutcome, TrailFilter, UiState } from '../../types'
@@ -29,7 +29,7 @@ export const STAGE_TITLE: Record<FlowStage | 'outcome', string> = {
   outcome: 'Outcome',
 }
 
-/** DESIGN-CONTRACT §3.2: one glyph per stage; `⚑` only for verification. */
+/** One glyph per stage; `⚑` only for verification. */
 export const STAGE_GLYPH: Record<TrailStage, string> = {
   delegation: '⇢',
   investigation: '⌕',
@@ -128,14 +128,14 @@ function commandFlagMatches(trail: Trail, node: TrailNode): boolean {
   return node.seq === Math.max(...runs.map(n => n.seq))
 }
 
-/** An F3 contribution the filter `unresolved` is about: UNRESOLVED evidence, or an outcome the evidence cannot settle. */
+/** A contribution the filter `unresolved` is about: UNRESOLVED evidence, or an outcome the evidence cannot settle. */
 const unsettled = (c: ContributionOutcome): boolean => c.evidence === 'UNRESOLVED' || c.category === 'unresolved'
 
 /**
  * Whether a node is what a filter is about:
- * - verified: the node is in one of its agent's F3 contributions classified `verified` (◇ INFERRED at best);
+ * - verified: the node is in one of its agent's outcome contributions classified `verified` (◇ INFERRED at best);
  * - unresolved: an UNRESOLVED trail flag names the node (or it is the latest run of a flagged command), or the node is
- *   in an F3 contribution whose evidence is UNRESOLVED or whose category is `unresolved`;
+ *   in an outcome contribution whose evidence is UNRESOLVED or whose category is `unresolved`;
  * - inconclusive / failed: a verification run with that verdict (● OBSERVED).
  */
 export function nodeMatches(trail: Trail, spend: SpendOutcome, node: TrailNode, filter: TrailFilter): boolean {
@@ -159,7 +159,7 @@ export function laneMatches(trail: Trail, spend: SpendOutcome, lane: TrailLane, 
   return flagged || (outcomeOf(spend, lane.agentId)?.contributions.some(unsettled) ?? false)
 }
 
-/** Lanes drawn by default, and at most when the person asks for all of them (the tree budget, DESIGN-CONTRACT §2). */
+/** Lanes drawn by default, and at most when the person asks for all of them (the tree budget). */
 export const LANE_CAP = 12
 export const LANE_CAP_ALL = 18
 /** Nodes drawn per stage of one lane, by default and with ALL_LANES open. */
@@ -192,14 +192,14 @@ export function filterCounts(trail: Trail, spend: SpendOutcome): Record<TrailFil
   return { all: trail.lanes.length, verified: count('verified'), unresolved: count('unresolved'), inconclusive: count('inconclusive'), failed: count('failed') }
 }
 
-/** F3's bucket words: the one table every view uses (`BUCKET_WORDS`, Sunset Glass §4.3). */
+/** The outcome bucket words: the one table every view uses (`BUCKET_WORDS`). */
 export const bucketLabel = (bucket: SpendBucket['bucket']): string => BUCKET_WORDS[bucket]
 
 export type Badge = { bucket: AgentOutcome['bucket']; label: string; role: string; evidence?: Evidence }
 
 /**
- * A lane's F3 bucket and the weakest evidence among the contributions that set it. The coordinator is not judged and
- * carries no label; `verified` is never drawn stronger than ◇ INFERRED (F3-4).
+ * A lane's outcome bucket and the weakest evidence among the contributions that set it. The coordinator is not judged
+ * and carries no label; `verified` is never drawn stronger than ◇ INFERRED.
  */
 export function badgeFor(spend: SpendOutcome, agentId: string): Badge | undefined {
   const agent = outcomeOf(spend, agentId)

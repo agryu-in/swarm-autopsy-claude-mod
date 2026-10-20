@@ -1,4 +1,4 @@
-// F3 · spend vs outcome: each agent's recorded usage beside what the
+// Spend vs outcome: each agent's recorded usage beside what the
 // contribution trail can establish about its work. Deterministic rules over
 // trail nodes, edges and flags; no model calls, no causation from order
 // alone. An agent's usage is never split across its contributions.

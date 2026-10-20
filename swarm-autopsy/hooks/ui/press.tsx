@@ -1,9 +1,8 @@
-// Press targets (docs/sunset-glass/DESIGN-CONTRACT.md §9): flattening styled
-// Text into runs, and the card line that is one press target. The desktop draws a
-// Button's label only, as one plain line (R1 §4.1), so there a line's styled
-// pieces (a chip, a pill) sit beside the Button and the Button carries the
-// line's plain text; the terminal keeps every run's style inside the Button.
-// Lead-owned; the kit re-exports everything here.
+// Press targets: flattening styled Text into runs, and the card line that is
+// one press target. The desktop draws a Button's label only, as one plain line,
+// so there a line's styled pieces (a chip, a pill) sit beside the Button and
+// the Button carries the line's plain text; the terminal keeps every run's
+// style inside the Button. The kit re-exports everything here.
 
 import type { RenderChildren } from 'claude-code'
 
@@ -43,7 +42,7 @@ export function textRuns(node: unknown, style: RunStyle = {}, out: Array<{ style
 const FIGURE_SPACE = ' '
 
 /**
- * One line of a pressable card (§9): the whole line is one plain Button calling `onPress`.
+ * One line of a pressable card: the whole line is one plain Button calling `onPress`.
  *
  * - Terminal: the Button holds `lead` and `children` as styled runs (chips, meters and `█` bars keep their colours).
  * - Desktop: `lead` (a chip, a state pill: anything styled) is drawn beside the Button, and the Button's label is the
